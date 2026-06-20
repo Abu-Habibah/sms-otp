@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Testing
+coverage/
+.nyc_output/
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend-specific
+backend/dist/
+backend/coverage/
+
+# Web-specific
+web/.next/
+web/out/
+web/build/
+
+# Prisma
+backend/prisma/dev.db*
+backend/prisma/migrations/dev/
+
+# Docker
+docker-compose.override.yml
+
+# Backup
+src-backup/
+
+# Android (existing project, gitignored as before)
+app/build/
+.gradle/
+.kotlin/
+local.properties
+build-*.log
+build.log
+test.log

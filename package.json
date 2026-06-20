@@ -1,0 +1,33 @@
+{
+  "name": "sms-monitor",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Multi-tenant SMS monitoring platform — backend API, web admin, and Android client",
+  "workspaces": [
+    "packages/*",
+    "backend",
+    "web"
+  ],
+  "scripts": {
+    "dev:backend": "pnpm --filter backend start:dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev:infra": "docker compose up -d",
+    "dev:infra:down": "docker compose down",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "prisma:generate": "pnpm --filter backend prisma generate",
+    "prisma:migrate": "pnpm --filter backend prisma migrate dev",
+    "prisma:studio": "pnpm --filter backend prisma studio",
+    "clean": "pnpm -r clean && rm -rf node_modules"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@11.5.2",
+  "devDependencies": {
+    "typescript": "5.6.3"
+  }
+}
