@@ -1,0 +1,20 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "skills": {
+    "project-rules": {
+      "enabled": true,
+      "name": "project-rules",
+      "description": "Auto-documentation, sprint planning, and bug tracking rules. Use when completing tasks, adding features, fixing bugs, or creating projects."
+    },
+    "ui-ux-pro-max": {
+      "enabled": true,
+      "name": "ui-ux-pro-max",
+      "description": "UI/UX design intelligence with searchable database. Use for design, build, create, implement, review, fix, or improve any UI/UX work — web, mobile, or desktop. Provides 67 styles, 161 color palettes, 57 font pairings, 99 UX guidelines, 25 chart types across 13+ tech stacks (Next.js, React, Vue, Jetpack Compose, React Native, Flutter, SwiftUI). Generates design systems with priority-based recommendations."
+    },
+    "prompt-rules": {
+      "enabled": true,
+      "name": "prompt-rules",
+      "description": "Prompt generation and execution management. Use when generating prompts for tasks, executing pending prompts, running tasks in batch, or creating agent-consumable prompt documents. Triggers: 'generate prompt for', 'create a prompt', 'execute task', 'go with your task', 'execute all tasks', 'run prompt'."
+    }
+  }
+}

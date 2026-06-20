@@ -1,0 +1,18 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e18]: Sign in — SMS Monitor
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - heading "Sign in" [level=1] [ref=e22]
+        - paragraph [ref=e23]: SMS Monitor v2.0 tenant admin
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e26]: Tenant
+          - textbox "Tenant" [ref=e27]
+        - generic [ref=e28]:
+          - generic [ref=e29]: Email
+          - textbox "Email" [ref=e30]: smoke@test.com
+        - generic [ref=e31]:
+          - generic [ref=e32]: Password
+          - textbox "Password" [ref=e33]: Strong1Pass!
+        - button "Sign in" [ref=e34] [cursor=pointer]

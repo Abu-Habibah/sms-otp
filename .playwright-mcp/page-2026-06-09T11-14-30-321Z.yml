@@ -1,0 +1,12 @@
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: SMS Monitor v2.0 — Sprint 1
+    - heading "Multi-tenant SMS forwarding, ready to build on." [level=1] [ref=e5]:
+      - text: Multi-tenant SMS forwarding,
+      - text: ready to build on.
+    - paragraph [ref=e6]: "Backend, web admin, and shared types scaffolded. Sprint 1: auth + tenants. Next: devices + SMS ingest."
+  - generic [ref=e7]:
+    - link "Go to admin" [ref=e8] [cursor=pointer]:
+      - /url: /login
+    - link "Dashboard" [ref=e9] [cursor=pointer]:
+      - /url: /dashboard
