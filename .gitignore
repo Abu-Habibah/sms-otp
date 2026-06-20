@@ -39,6 +39,7 @@ Thumbs.db
 # Backend-specific
 backend/dist/
 backend/coverage/
+backend/.pgdata/
 
 # Web-specific
 web/.next/

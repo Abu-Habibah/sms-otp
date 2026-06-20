@@ -1,0 +1,257 @@
+// Prisma schema — SMS Monitor v2.0
+// Multi-tenant SaaS. Every domain table carries a tenantId; queries must
+// filter by it (enforced at the application layer via a Prisma extension
+// that reads tenant context from AsyncLocalStorage).
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────
+
+enum UserRole {
+  OWNER
+  ADMIN
+  VIEWER
+}
+
+enum DeviceStatus {
+  PENDING_CLAIM
+  ACTIVE
+  SUSPENDED
+  REVOKED
+}
+
+enum SmsStatus {
+  PENDING
+  FORWARDED
+  FAILED
+}
+
+enum MatchMode {
+  EXACT
+  CONTAINS
+  REGEX
+  AT_START
+  AT_END
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+// ─── Tenancy ────────────────────────────────────────────────────────
+
+model Tenant {
+  id                String   @id @default(uuid())
+  name              String
+  slug              String   @unique
+  forwardUrl        String?
+  forwardUrlEnabled Boolean  @default(true)
+  retentionDays     Int      @default(90)
+  publicApiUrl      String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  users          User[]
+  devices        Device[]
+  keywords       Keyword[]
+  smsLogs        SmsLog[]
+  claimCodes     ClaimCode[]
+  refreshTokens  RefreshToken[]
+  workspaces     Workspace[]
+
+  @@index([slug])
+  @@map("tenants")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  tenantId      String
+  email         String
+  name          String
+  passwordHash  String
+  role          UserRole  @default(VIEWER)
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  refreshTokens  RefreshToken[]
+  userWorkspaces UserWorkspace[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId, active])
+  @@map("users")
+}
+
+// ─── Workspaces ────────────────────────────────────────────────────────
+
+model Workspace {
+  id                String   @id @default(uuid())
+  tenantId          String
+  name              String
+  slug              String
+  forwardUrl        String?
+  forwardUrlEnabled Boolean  @default(true)
+  retentionDays     Int      @default(90)
+  publicApiUrl      String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  tenant        Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  devices       Device[]
+  keywords      Keyword[]
+  smsLogs       SmsLog[]
+  userWorkspaces UserWorkspace[]
+  claimCodes    ClaimCode[]
+
+  @@unique([tenantId, slug])
+  @@map("workspaces")
+}
+
+model UserWorkspace {
+  userId      String
+  workspaceId String
+  role        WorkspaceRole @default(MEMBER)
+  createdAt   DateTime    @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@id([userId, workspaceId])
+  @@map("user_workspaces")
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  tenantId    String
+  userId      String
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+  lastUsedAt  DateTime?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+// ─── Devices ────────────────────────────────────────────────────────
+
+model Device {
+  id           String       @id @default(uuid())
+  tenantId     String
+  workspaceId  String
+  name         String
+  status       DeviceStatus @default(PENDING_CLAIM)
+  // HMAC signing key (never sent to the web/admin UI, only to the device itself on claim)
+  deviceSecret String
+  apiKey       String       @unique @default(cuid())
+  publicKey    String?
+  manufacturer   String?
+  model          String?
+  osVersion      String?
+  appVersion     String?
+  simSlot1Number String?
+  simSlot2Number String?
+  deviceModel    String?
+  androidVersion String?
+  lastHeartbeat  DateTime?
+  identifyRequestedAt DateTime?
+  identifyAckedAt     DateTime?
+  lastSeenAt   DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workspace  Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  smsLogs    SmsLog[]
+  claimedBy  ClaimCode[]
+
+  @@index([tenantId])
+  @@index([workspaceId])
+  @@unique([workspaceId, publicKey])
+  @@map("devices")
+}
+
+model ClaimCode {
+  id             String    @id @default(uuid())
+  tenantId       String
+  workspaceId    String
+  code           String    @unique
+  expiresAt      DateTime
+  usedAt         DateTime?
+  usedByDeviceId String?   @unique
+  createdBy      String
+  createdAt      DateTime  @default(now())
+
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  usedByDevice  Device?   @relation(fields: [usedByDeviceId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([workspaceId])
+  @@map("claim_codes")
+}
+
+// ─── Keywords & SMS ──────────────────────────────────────────────────
+
+model Keyword {
+  id        String     @id @default(uuid())
+  tenantId  String
+  workspaceId String
+  word      String
+  matchMode MatchMode  @default(CONTAINS)
+  enabled   Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, word])
+  @@index([tenantId])
+  @@index([workspaceId])
+  @@map("keywords")
+}
+
+model SmsLog {
+  id              String     @id @default(uuid())
+  tenantId        String
+  workspaceId     String
+  deviceId        String
+  smsId           String     // hash of (sender + timestamp) from the device
+  sender          String
+  message         String
+  matchedKeyword  String
+  status          SmsStatus  @default(PENDING)
+  retryCount      Int        @default(0)
+  errorMessage    String?
+  receivedAt      DateTime
+  forwardedAt     DateTime?
+  createdAt       DateTime   @default(now())
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  device    Device     @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceId, smsId]) // dedupe on device side; worker does the same via upsert
+  @@index([tenantId, status, createdAt])
+  @@index([workspaceId])
+  @@index([deviceId])
+  @@map("sms_logs")
+}
