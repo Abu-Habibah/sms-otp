@@ -1,0 +1,12 @@
+{
+  "name": "sms-monitor-test-backend",
+  "version": "1.0.0",
+  "description": "Test backend for SMS Monitor app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
