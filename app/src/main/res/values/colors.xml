@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Secure Shield Color Palette -->
+    
+    <!-- Primary - Security Blue -->
+    <color name="primary">#0369A1</color>
+    <color name="primary_light">#0EA5E9</color>
+    <color name="primary_dark">#0C4A6E</color>
+    <color name="primary_variant">#0284C7</color>
+    
+    <!-- Secondary - Sky Blue -->
+    <color name="secondary">#0EA5E9</color>
+    <color name="secondary_light">#38BDF8</color>
+    <color name="secondary_dark">#0284C7</color>
+    
+    <!-- CTA - Protected Green -->
+    <color name="cta">#22C55E</color>
+    <color name="cta_light">#4ADE80</color>
+    <color name="cta_dark">#16A34A</color>
+    
+    <!-- Background -->
+    <color name="background">#F0F9FF</color>
+    <color name="background_dark">#0C4A6E</color>
+    
+    <!-- Surface -->
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_dark">#1E293B</color>
+    
+    <!-- Text -->
+    <color name="text_primary">#0C4A6E</color>
+    <color name="text_secondary">#64748B</color>
+    <color name="text_hint">#94A3B8</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    
+    <!-- Status Colors -->
+    <color name="status_success">#22C55E</color>
+    <color name="status_warning">#F59E0B</color>
+    <color name="status_error">#EF4444</color>
+    <color name="status_pending">#F59E0B</color>
+    
+    <!-- Border -->
+    <color name="border">#E2E8F0</color>
+    <color name="border_light">#F1F5F9</color>
+    
+    <!-- Card -->
+    <color name="card_background">#FFFFFF</color>
+    <color name="card_shadow">#1A0369A1</color>
+    
+    <!-- Status Bar -->
+    <color name="status_bar">#0C4A6E</color>
+    
+    <!-- Icon Background -->
+    <color name="icon_background">#E0F2FE</color>
+    
+    <!-- Existing colors -->
+    <color name="ic_launcher_background">#0369A1</color>
+</resources>

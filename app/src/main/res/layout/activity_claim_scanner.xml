@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <!-- Camera Preview -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/cameraPreview"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomOverlay"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Top Overlay -->
+    <LinearLayout
+        android:id="@+id/topOverlay"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:background="#CC0C4A6E"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Scan Claim Code"
+            android:textColor="@android:color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/instructionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Point camera at QR code from web admin"
+            android:textColor="#B0FFFFFF"
+            android:textSize="14sp"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <!-- Scan Frame Indicator -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/scanFrame"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeColor="@color/cta"
+        app:strokeWidth="3dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Corner Accents -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/scan_corner_top_left"
+        app:layout_constraintTop_toTopOf="@id/scanFrame"
+        app:layout_constraintStart_toStartOf="@id/scanFrame" />
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/scan_corner_top_right"
+        app:layout_constraintTop_toTopOf="@id/scanFrame"
+        app:layout_constraintEnd_toEndOf="@id/scanFrame" />
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/scan_corner_bottom_left"
+        app:layout_constraintBottom_toBottomOf="@id/scanFrame"
+        app:layout_constraintStart_toStartOf="@id/scanFrame" />
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/scan_corner_bottom_right"
+        app:layout_constraintBottom_toBottomOf="@id/scanFrame"
+        app:layout_constraintEnd_toEndOf="@id/scanFrame" />
+
+    <!-- Bottom Overlay -->
+    <LinearLayout
+        android:id="@+id/bottomOverlay"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:background="#CC0C4A6E"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Or"
+            android:textColor="#B0FFFFFF"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginBottom="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/manualEntryButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Enter Code Manually"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:backgroundTint="@color/cta"
+            app:cornerRadius="12dp"
+            android:textColor="@color/text_on_primary"
+            android:layout_marginBottom="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/skipButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Skip for Now"
+            android:textAllCaps="false"
+            android:textSize="14sp"
+            android:backgroundTint="@android:color/transparent"
+            android:textColor="#B0FFFFFF"
+            app:rippleColor="#33FFFFFF"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/versionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="11sp"
+            android:textColor="#80FFFFFF"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

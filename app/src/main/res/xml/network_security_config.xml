@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Base config for development (allows cleartext for local testing) -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Production config - Certificate pinning disabled until real certs are configured -->
+    <!-- To enable pinning:
+         1. Get the SHA-256 hash of your server's certificate public key
+         2. Add it as: <pin digest="SHA-256">YOUR_BASE64_HASH_HERE</pin>
+         3. Add a backup pin for certificate rotation
+         4. Remove the cleartextTrafficPermitted="true" from base-config
+    -->
+    <!--
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.smsmonitor.com</domain>
+        <pin-set expiration="2027-01-01">
+            <pin digest="SHA-256">YOUR_PRIMARY_PIN_HERE</pin>
+            <pin digest="SHA-256">YOUR_BACKUP_PIN_HERE</pin>
+        </pin-set>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+    -->
+
+    <!-- Debug config (disables pinning for development) -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="user" />
+            <certificates src="system" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>
