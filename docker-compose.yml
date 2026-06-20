@@ -1,0 +1,99 @@
+# SMS Monitor v2.0 — Full Development Stack
+# Brings up Postgres, Redis, MailHog, Backend (NestJS), and Web (Next.js).
+
+services:
+  # PostgreSQL Database
+  pg:
+    image: postgres:16-alpine
+    container_name: sms-monitor-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sms_monitor
+      POSTGRES_PASSWORD: sms_monitor_dev
+      POSTGRES_DB: sms_monitor
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sms_monitor -d sms_monitor"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sms-net
+
+  # Redis (for BullMQ job queue)
+  rd:
+    image: redis:7-alpine
+    container_name: sms-monitor-rd
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - rd_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sms-net
+
+  # MailHog (dev email capture)
+  mh:
+    image: mailhog/mailhog:latest
+    container_name: sms-monitor-mh
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    networks:
+      - sms-net
+
+  # Backend API (NestJS)
+  be:
+    build:
+      context: .
+      dockerfile: docker/services/be/Dockerfile
+    container_name: sms-monitor-be
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://sms_monitor:sms_monitor_dev@pg:5432/sms_monitor
+      REDIS_URL: redis://rd:6379
+      JWT_SECRET: dev-secret-change-in-production
+      NODE_ENV: development
+    depends_on:
+      pg:
+        condition: service_healthy
+      rd:
+        condition: service_healthy
+    networks:
+      - sms-net
+
+  # Web Admin (Next.js)
+  web:
+    build:
+      context: .
+      dockerfile: docker/services/web/Dockerfile
+    container_name: sms-monitor-web
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://be:3000
+      - BACKEND_URL=http://be:3000
+    depends_on:
+      - be
+    networks:
+      - sms-net
+
+networks:
+  sms-net:
+    driver: bridge
+
+volumes:
+  pg_data:
+  rd_data:
