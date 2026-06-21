@@ -10,7 +10,7 @@ import { CommonModule } from '../common/common.module';
     BullModule.registerQueue({
       name: SMS_FORWARD_QUEUE,
       connection: {
-        url: process.env.REDIS_URL || 'redis://localhost:6379',
+        url: process.env.REDIS_URL || 'redis://localhost:6004',
       },
     }),
   ],

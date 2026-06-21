@@ -1,10 +1,11 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
-import { randomBytes } from 'node:crypto';
+import { createHash, createHmac, randomBytes } from 'node:crypto';
 import { RawPrismaService } from '../common/prisma/raw-prisma.service';
+import { MailService } from '../mail/mail.service';
 import { TenantScopedPrismaService } from '../common/prisma/tenant-scoped-prisma.service';
 
 export interface AuthTokens {
@@ -23,6 +24,7 @@ export class AuthService {
     private readonly scopedPrisma: TenantScopedPrismaService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly mail: MailService,
   ) {}
 
   async signup(input: { name: string; email: string; password: string }): Promise<AuthTokens> {
@@ -43,6 +45,8 @@ export class AuthService {
     if (existing) {
       throw new ConflictException('Email already in use');
     }
+
+    validatePassword(input.password);
 
     const passwordHash = await bcrypt.hash(input.password, 12);
     const user = await this.rawPrisma.user.create({
@@ -126,9 +130,82 @@ export class AuthService {
     });
     return { accessToken, refreshToken: refreshTokenRaw, expiresIn: ACCESS_TTL_SECONDS };
   }
+
+  async forgotPassword(email: string): Promise<void> {
+    // Constant-time response — never reveal whether email exists
+    const normalizedEmail = email.toLowerCase();
+    const user = await this.rawPrisma.user.findFirst({
+      where: { email: normalizedEmail, active: true },
+      include: { tenant: true },
+    });
+    if (!user) {
+      // Simulate token generation time to avoid timing attacks
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      return;
+    }
+
+    const rawToken = randomBytes(32).toString('base64url');
+    const tokenHash = hashToken(rawToken);
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    await this.rawPrisma.passwordResetToken.create({
+      data: {
+        tenantId: user.tenantId,
+        userId: user.id,
+        tokenHash,
+        expiresAt,
+      },
+    });
+
+    await this.mail.sendPasswordResetEmail(user.email, rawToken);
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    validatePassword(newPassword);
+
+    const tokenHash = hashToken(token);
+    const stored = await this.rawPrisma.passwordResetToken.findUnique({
+      where: { tokenHash },
+    });
+
+    if (!stored || stored.expiresAt < new Date() || stored.usedAt) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+
+    await this.rawPrisma.passwordResetToken.update({
+      where: { id: stored.id },
+      data: { usedAt: new Date() },
+    });
+
+    await this.rawPrisma.user.update({
+      where: { id: stored.userId },
+      data: { passwordHash },
+    });
+
+    // Invalidate all refresh tokens for this user (security measure)
+    await this.rawPrisma.refreshToken.updateMany({
+      where: { userId: stored.userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
 }
 
+const REFRESH_TOKEN_SECRET = process.env['REFRESH_TOKEN_SECRET'] ?? process.env['JWT_SECRET'] ?? 'dev-fallback';
+
 export function hashRefreshToken(raw: string): string {
-  // Simple hash; the raw token is the secret, the hash is the DB lookup key.
-  return Buffer.from(raw).toString('base64url');
+  // HMAC-SHA256 — one-way hash. The raw token is the secret, the hash is the DB lookup key.
+  return createHmac('sha256', REFRESH_TOKEN_SECRET).update(raw).digest('hex');
+}
+
+function hashToken(raw: string): string {
+  return createHash('sha256').update(raw).digest('base64url');
+}
+
+function validatePassword(password: string): void {
+  if (password.length < 8) throw new BadRequestException('Password must be at least 8 characters');
+  if (!/[A-Z]/.test(password)) throw new BadRequestException('Password must contain at least one uppercase letter');
+  if (!/[a-z]/.test(password)) throw new BadRequestException('Password must contain at least one lowercase letter');
+  if (!/[0-9]/.test(password)) throw new BadRequestException('Password must contain at least one number');
 }

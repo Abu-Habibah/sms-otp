@@ -1,7 +1,7 @@
 # Feature: Workspace-Scoped Device Claim
 
 **Feature ID:** F-WORKSPACE-CLAIM
-**Status:** 🔲 Not started
+**Status:** ✅ Backend implemented, Android/Web pending (2026-06-18)
 **Last Updated:** 2026-06-13
 
 ---
@@ -118,12 +118,12 @@ async list(workspaceId?: string) {
 
 **Current:**
 ```
-http://be:3000/v1/claim?code=XYZ12345
+http://be:6001/v1/claim?code=XYZ12345
 ```
 
 **Proposed:**
 ```
-http://be:3000/v1/claim?code=XYZ12345&workspaceId=WS123
+http://be:6001/v1/claim?code=XYZ12345&workspaceId=WS123
 ```
 
 ### 2. ClaimCodeScannerActivity.kt

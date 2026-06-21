@@ -6,8 +6,11 @@ import {
   Param,
   Patch,
   Post,
+  UsePipes,
 } from '@nestjs/common';
 import { WorkspaceRole } from '@prisma/client';
+import { createWorkspaceSchema } from '@sms-monitor/shared-types';
+import { ZodValidationPipe } from '../common/validation/zod-validation.pipe';
 import { WorkspaceService, type CreateWorkspaceInput, type UpdateWorkspaceInput } from './workspace.service';
 
 @Controller('v1/workspaces')
@@ -16,6 +19,7 @@ export class WorkspaceController {
 
   // ─── Workspace CRUD ────────────────────────────────────────────────
 
+  @UsePipes(new ZodValidationPipe(createWorkspaceSchema))
   @Post()
   create(@Body() input: CreateWorkspaceInput) {
     return this.workspaceService.create(input);

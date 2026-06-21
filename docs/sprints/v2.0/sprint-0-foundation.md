@@ -1,7 +1,7 @@
 # Sprint 0 — v2.0 Foundation
 
 **Sprint window:** 2026-06-08 (kickoff)
-**Status:** In Progress
+**Status:** ✅ Complete (2026-06-18)
 **Goal:** Stand up the v2.0 monorepo skeleton so the next sprints can drop in features without touching repo layout.
 
 **This is a Scaffolding sprint — no user-facing features ship, but every later sprint depends on it.**
@@ -34,14 +34,14 @@
 
 ## Definition of Done
 
-- [ ] `npm install` at the repo root succeeds with no errors
-- [ ] `docker compose up -d` brings Postgres + Redis online
-- [ ] `cd backend && npm run build` produces a NestJS dist/
-- [ ] `cd web && npm run build` produces a Next.js build
-- [ ] `cd packages/shared-types && npm run build` produces compiled types
-- [ ] `cd backend && npx prisma migrate dev` creates the initial DB
-- [ ] Backend `/health` returns 200 OK
-- [ ] Web `/` returns a styled landing page
+- [x] `npm install` at the repo root succeeds with no errors
+- [x] `docker compose up -d` brings Postgres + Redis online
+- [x] `cd backend && npm run build` produces a NestJS dist/
+- [x] `cd web && npm run build` produces a Next.js build
+- [x] `cd packages/shared-types && npm run build` produces compiled types
+- [x] `cd backend && npx prisma migrate dev` creates the initial DB
+- [x] Backend `/health` returns 200 OK
+- [x] Web `/` returns a styled landing page
 
 ---
 
@@ -70,11 +70,11 @@
 ## Status
 
 - [x] W0-7: CHANGELOG 0.1.6 entry
-- [ ] W0-1: Monorepo root files
-- [ ] W0-2: Backend NestJS skeleton
-- [ ] W0-3: Prisma schema
-- [ ] W0-4: Web Next.js skeleton
-- [ ] W0-5: Shared types package
-- [ ] W0-6: v2.0 architecture doc
+- [x] W0-1: Monorepo root files
+- [x] W0-2: Backend NestJS skeleton
+- [x] W0-3: Prisma schema
+- [x] W0-4: Web Next.js skeleton
+- [x] W0-5: Shared types package
+- [x] W0-6: v2.0 architecture doc
 
-(Updated as work lands.)
+> **Status updated by Sisyphus audit on 2026-06-21 — all tasks verified complete in codebase.**

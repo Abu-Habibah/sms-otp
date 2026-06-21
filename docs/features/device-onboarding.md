@@ -83,7 +83,7 @@ Both QR scan (`ClaimCodeScannerActivity`) and manual entry (`ManualCodeEntryActi
 ```kotlin
 suspend fun claim(serverUrl: String, code: String, deviceName: String): ClaimResult {
     val deviceInfo = DeviceInfoCollector.collectDeviceInfoWithSim()
-    val response = httpClient.post("$serverUrl/v1/claim") {
+    val response = httpClient.post("$serverUrl/v1/claim-codes/claim") {
         setBody(ClaimRequest(
             code = code,
             publicKey = devicePublicKey,

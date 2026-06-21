@@ -13,13 +13,13 @@ Run this checklist before tagging any release that touches the SMS pipeline.
 
 ## Steps
 
-1. **Backend health** — `curl http://localhost:3000/health` returns `200` with `db: "up"`
-2. **Web admin loads** — `http://localhost:3001` renders the landing page, no console errors
+1. **Backend health** — `curl http://localhost:6001/health` returns `200` with `db: "up"`
+2. **Web admin loads** — `http://localhost:6002` renders the landing page, no console errors
 3. **Device is ACTIVE** — in the web admin's Devices page, the device shows status `ACTIVE` and `lastSeenAt` within the last 5 minutes
 4. **Keyword configured** — at least one keyword exists for the tenant
 5. **Send a real SMS** from the second phone to the device's number, with body containing the keyword (e.g. `Your OTP is 654321` if keyword is `OTP`)
 6. **Wait 10 seconds** (the receiver does the immediate send, then the worker confirms in the DB)
-7. **Backend received it** — `GET http://localhost:3000/v1/sms-logs?tenantId=...` shows a row with `status: FORWARDED`
+7. **Backend received it** — `GET http://localhost:6001/v1/sms-logs?tenantId=...` shows a row with `status: FORWARDED`
 8. **Tenant downstream received it** — if the tenant's `forwardUrl` is set, the receiving service shows the SMS
 
 ## Pass criteria

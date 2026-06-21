@@ -29,10 +29,17 @@ export class SmsIngestService {
     private readonly forwarder: SmsForwarderService,
   ) {}
 
-  async list() {
-    return this.prisma.smsLog.findMany({
-      orderBy: { receivedAt: 'desc' },
-    });
+  async list(page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+    const [logs, total] = await Promise.all([
+      this.prisma.smsLog.findMany({
+        orderBy: { receivedAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.smsLog.count(),
+    ]);
+    return { logs, total, page, limit };
   }
 
   async ingest(deviceId: string, input: IngestSmsInput): Promise<IngestSmsResult> {

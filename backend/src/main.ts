@@ -15,10 +15,14 @@ async function bootstrap(): Promise<void> {
   const cookieParser = (await import('cookie-parser')).default;
   app.use(cookieParser());
 
-  // CORS for the web admin
-  const corsOrigins = config.get<string>('CORS_ORIGINS')?.split(',') ?? [];
+  // CORS for the web admin — fail-closed when no origins configured
+  const rawOrigins = config.get<string>('CORS_ORIGINS')?.split(',').map((s) => s.trim()) ?? [];
+  const corsOrigins = rawOrigins.filter((s) => s.length > 0);
+  if (corsOrigins.length === 0 && config.get<string>('NODE_ENV') !== 'production') {
+    corsOrigins.push('http://localhost:6002');
+  }
   app.enableCors({
-    origin: corsOrigins.length > 0 ? corsOrigins : true,
+    origin: corsOrigins.length > 0 ? corsOrigins : false,
     credentials: true,
   });
 

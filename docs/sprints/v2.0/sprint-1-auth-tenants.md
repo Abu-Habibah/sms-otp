@@ -45,8 +45,8 @@
 
 - [x] `pnpm install` succeeds at repo root
 - [x] `pnpm --filter @sms-monitor/backend prisma:migrate` creates the new tables
-- [x] `pnpm --filter @sms-monitor/backend start:dev` boots on :3000 with `/health` → 200
-- [x] `pnpm --filter @sms-monitor/web dev` boots on :3001
+- [x] `pnpm --filter @sms-monitor/backend start:dev` boots on :6001 with `/health` → 200
+- [x] `pnpm --filter @sms-monitor/web dev` boots on :6002
 - [x] `pnpm -r typecheck` passes
 - [x] `pnpm --filter @sms-monitor/backend test:e2e` passes — 35 tests passing
 - [x] `pnpm --filter @sms-monitor/web test` — web tests pass

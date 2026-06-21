@@ -15,7 +15,7 @@ If you have working Docker:
 docker compose up -d postgres
 
 # backend/.env (create it; copy from .env.example)
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/sms_monitor_test
+DATABASE_URL=postgres://postgres:postgres@localhost:6003/sms_monitor_test
 JWT_SECRET=local-dev-secret-not-for-prod
 
 # Apply the Prisma schema to the test DB
@@ -23,7 +23,7 @@ pnpm --filter @sms-monitor/backend exec prisma db push
 
 # Run the e2e suite
 cd backend
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/sms_monitor_test \
+DATABASE_URL=postgres://postgres:postgres@localhost:6003/sms_monitor_test \
 JWT_SECRET=local-dev-secret-not-for-prod \
 pnpm exec jest --config ./test/jest-e2e.json --runInBand
 ```
@@ -97,9 +97,9 @@ A working `global-setup.cjs` skeleton is in the git history of this repo (was co
 - **Manual browser smoke** — signup → login → `/v1/me` → `/dashboard`. Run after the e2e suite passes:
   ```bash
   pnpm dev:infra            # Postgres + Redis + MailHog
-  pnpm --filter @sms-monitor/backend start:dev    # :3000
-  pnpm --filter @sms-monitor/web dev              # :3001
-  # open http://localhost:3001/signup
+  pnpm --filter @sms-monitor/backend start:dev    # :6001
+  pnpm --filter @sms-monitor/web dev              # :6002
+  # open http://localhost:6002/signup
   ```
 - **Refresh token rotation** — there is no e2e test for `/v1/auth/refresh` yet. Add one in Sprint 2.
 - **Logout-everywhere** (revoke all refresh tokens) — not implemented; Sprint 2.

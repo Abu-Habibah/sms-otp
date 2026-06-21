@@ -129,7 +129,7 @@ Before removing, grep for `import retrofit2` in `app/src/`. If any file uses Ret
 
 ### Background
 
-QR codes currently use the internal Docker address (`http://be:3000`) or the web admin's origin, which physical Android devices cannot reach. This task adds a configurable `publicApiUrl` field to each tenant, allowing admins to set the correct external URL for QR codes.
+QR codes currently use the internal Docker address (`http://be:6001`) or the web admin's origin, which physical Android devices cannot reach. This task adds a configurable `publicApiUrl` field to each tenant, allowing admins to set the correct external URL for QR codes.
 
 ### Requirements
 
@@ -152,7 +152,7 @@ function detectPublicApiUrl(): string {
     return window.location.origin;
   }
   // 3. Ultimate fallback
-  return 'http://localhost:3000';
+  return 'http://localhost:6001';
 }
 ```
 
@@ -169,14 +169,14 @@ function detectPublicApiUrl(): string {
 
 ### Acceptance Criteria
 
-- [ ] AC-1: Tenant model has `publicApiUrl String?` field
-- [ ] AC-2: `GET /v1/tenants/me` returns `publicApiUrl` (null if not set)
-- [ ] AC-3: `PATCH /v1/tenants/:id` accepts `publicApiUrl` field
-- [ ] AC-4: Web Settings page shows "Public API URL" input
-- [ ] AC-5: Input pre-filled with auto-detected value when null
-- [ ] AC-6: QR code uses `tenant.publicApiUrl` when set
-- [ ] AC-7: QR code falls back to `window.location.origin` when not set
-- [ ] AC-8: Value persists to DB on save
+- [x] AC-1: Tenant model has `publicApiUrl String?` field
+- [x] AC-2: `GET /v1/tenants/me` returns `publicApiUrl` (null if not set)
+- [x] AC-3: `PATCH /v1/tenants/:id` accepts `publicApiUrl` field
+- [x] AC-4: Web Settings page shows "Public API URL" input
+- [x] AC-5: Input pre-filled with auto-detected value when null
+- [x] AC-6: QR code uses `tenant.publicApiUrl` when set
+- [x] AC-7: QR code falls back to `window.location.origin` when not set
+- [x] AC-8: Value persists to DB on save
 
 ### Documentation
 
@@ -212,12 +212,12 @@ Keywords currently only sync once on app launch. If an admin adds/removes keywor
 
 ### Acceptance Criteria
 
-- [ ] AC-1: Keywords sync after successful heartbeat
-- [ ] AC-2: Sync throttled to max once per 5 minutes
-- [ ] AC-3: Failed heartbeat does NOT trigger sync
-- [ ] AC-4: Failed sync does NOT affect heartbeat status
-- [ ] AC-5: Sync uses HMAC authentication
-- [ ] AC-6: Sync results logged
+- [x] AC-1: Keywords sync after successful heartbeat
+- [x] AC-2: Sync throttled to max once per 5 minutes
+- [x] AC-3: Failed heartbeat does NOT trigger sync
+- [x] AC-4: Failed sync does NOT affect heartbeat status
+- [x] AC-5: Sync uses HMAC authentication
+- [x] AC-6: Sync results logged
 
 ### Documentation
 

@@ -40,16 +40,16 @@ pnpm dev:backend
 pnpm dev:web
 
 # 8. Smoke test
-curl http://localhost:3000/health
-open http://localhost:3001
+curl http://localhost:6001/health
+open http://localhost:6002
 ```
 
 ## Verification
 
-- Backend health: `curl http://localhost:3000/health` → 200 `{"status":"ok"}`
-- Web: `http://localhost:3001` renders the landing page
+- Backend health: `curl http://localhost:6001/health` → 200 `{"status":"ok"}`
+- Web: `http://localhost:6002` renders the landing page
 - DB: `pnpm prisma:studio` opens Prisma Studio at `http://localhost:5555`
-- MailHog: `http://localhost:8025` (any transactional emails land here)
+- MailHog: `http://localhost:6006` (any transactional emails land here)
 
 ## Rollback
 

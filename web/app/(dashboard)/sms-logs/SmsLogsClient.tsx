@@ -3,9 +3,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { SmsLog, SmsStatus, Workspace } from '@sms-monitor/shared-types';
-import { MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 
 type StatusFilter = 'ALL' | SmsStatus;
+
+const PAGE_SIZE = 20;
 
 function statusColor(status: SmsStatus): string {
   switch (status) {
@@ -41,6 +43,8 @@ export function SmsLogsClient({ initialLogs }: { initialLogs: SmsLog[] }) {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>('');
   const [filter, setFilter] = useState<StatusFilter>('ALL');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     fetch('/api/v1/workspaces')
@@ -50,23 +54,40 @@ export function SmsLogsClient({ initialLogs }: { initialLogs: SmsLog[] }) {
   }, []);
 
   const refreshLogs = useCallback(async () => {
-    const smsUrl = selectedWorkspaceId ? `/api/v1/workspaces/${selectedWorkspaceId}/sms-logs` : '/api/v1/sms-logs';
+    const baseUrl = selectedWorkspaceId ? `/api/v1/workspaces/${selectedWorkspaceId}/sms-logs` : '/api/v1/sms-logs';
+    const smsUrl = `${baseUrl}?page=${page}&limit=${PAGE_SIZE}`;
     const res = await fetch(smsUrl);
     if (res.ok) {
       const data = await res.json();
-      setLogs(Array.isArray(data) ? data : data.logs ?? []);
+      if (Array.isArray(data)) {
+        setLogs(data);
+        setTotal(data.length);
+      } else if (data.logs) {
+        setLogs(data.logs);
+        setTotal(data.total);
+      } else {
+        setLogs([]);
+        setTotal(0);
+      }
     }
-  }, [selectedWorkspaceId]);
+  }, [selectedWorkspaceId, page]);
 
   useEffect(() => {
     refreshLogs();
   }, [refreshLogs]);
+
+  // Reset page when workspace or filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [selectedWorkspaceId, filter]);
 
   const filteredLogs = filter === 'ALL' ? logs : logs.filter((log) => log.status === filter);
 
   const toggleExpand = useCallback((id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
   }, []);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <>
@@ -97,7 +118,9 @@ export function SmsLogsClient({ initialLogs }: { initialLogs: SmsLog[] }) {
             {status}
           </button>
         ))}
-        <span className="ml-auto text-sm text-muted-foreground">{filteredLogs.length} entries</span>
+        <span className="ml-auto text-sm text-muted-foreground">
+          {total} entries{totalPages > 1 && ` (page ${page} of ${totalPages})`}
+        </span>
       </div>
 
       {filteredLogs.length === 0 ? (
@@ -193,6 +216,30 @@ export function SmsLogsClient({ initialLogs }: { initialLogs: SmsLog[] }) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 py-4">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Previous
+          </button>
+          <span className="text-sm text-muted-foreground">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+            className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       )}
     </>

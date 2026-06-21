@@ -14,7 +14,7 @@ Each tenant can configure a **Public API URL** — the external address that And
 
 ### Problem Solved
 
-QR codes currently use the internal Docker address (`http://be:3000`) or the web admin's origin (`http://localhost:3001`), which physical Android devices cannot reach. This feature ensures QR codes always contain a URL the device can actually connect to.
+QR codes currently use the internal Docker address (`http://be:6001`) or the web admin's origin (`http://localhost:6002`), which physical Android devices cannot reach. This feature ensures QR codes always contain a URL the device can actually connect to.
 
 ### User Story
 
@@ -72,7 +72,7 @@ function detectPublicApiUrl(): string {
   }
   
   // 3. Ultimate fallback (server-side)
-  return 'http://localhost:3000';
+  return 'http://localhost:6001';
 }
 ```
 

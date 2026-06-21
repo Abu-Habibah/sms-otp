@@ -1,9 +1,24 @@
-import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Patch, Post, UseGuards, UsePipes } from '@nestjs/common';
+import { z } from 'zod';
+import { ZodValidationPipe } from '../common/validation/zod-validation.pipe';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { ApiKeyAuthGuard } from '../common/guards/api-key-auth.guard';
 import { getTenantContext } from '../common/tenant-context/tenant-context.storage';
 import { DevicesService } from './devices.service';
+
+const heartbeatBodySchema = z.object({
+  deviceInfo: z.object({
+    manufacturer: z.string().max(50).optional(),
+    model: z.string().max(50).optional(),
+    osVersion: z.string().max(50).optional(),
+    appVersion: z.string().max(50).optional(),
+    simSlot1Number: z.string().max(20).optional(),
+    simSlot2Number: z.string().max(20).optional(),
+    deviceModel: z.string().max(50).optional(),
+    androidVersion: z.string().max(50).optional(),
+  }).optional(),
+});
 
 @Controller('v1/devices')
 export class DevicesController {
@@ -79,6 +94,7 @@ export class DevicesController {
     return this.devices.reactivate(id);
   }
 
+  @UsePipes(new ZodValidationPipe(heartbeatBodySchema))
   @Public()
   @UseGuards(ApiKeyAuthGuard)
   @Post(':id/heartbeat')

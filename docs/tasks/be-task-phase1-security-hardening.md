@@ -85,7 +85,7 @@ Replace insecure `base64url` encoding with HMAC-SHA256.
      credentials: true,
    });
    ```
-2. In development (NODE_ENV=development), allow `http://localhost:3001` automatically
+2. In development (NODE_ENV=development), allow `http://localhost:6002` automatically
 
 **Verification:** Without CORS_ORIGINS set, cross-origin requests are rejected. With it set, they pass.
 
@@ -103,7 +103,7 @@ Replace insecure `base64url` encoding with HMAC-SHA256.
 2. Or alternatively: restrict to URLs matching configured CORS origins / known hosts
 3. Add a max redirect limit (no following redirects to internal IPs)
 
-**Verification:** Send internal URL like `http://localhost:5432` → rejected. Send configured workspace URL → works.
+**Verification:** Send internal URL like `http://localhost:6003` → rejected. Send configured workspace URL → works.
 
 ---
 

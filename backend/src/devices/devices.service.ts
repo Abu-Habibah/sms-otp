@@ -80,7 +80,7 @@ export class DevicesService {
             workspaceName: workspace?.name ?? null,
           },
           apiKey: updatedDevice.apiKey,
-          serverUrl: process.env['PUBLIC_API_BASE_URL'] ?? 'http://localhost:3000',
+          serverUrl: process.env['PUBLIC_API_BASE_URL'] ?? 'http://localhost:6001',
         };
       }
 
@@ -131,12 +131,17 @@ export class DevicesService {
         workspaceName: workspace?.name ?? null,
       },
       apiKey: device.apiKey,
-      serverUrl: process.env['PUBLIC_API_BASE_URL'] ?? 'http://localhost:3000',
+      serverUrl: process.env['PUBLIC_API_BASE_URL'] ?? 'http://localhost:6001',
     };
   }
 
   async list() {
-    return this.prisma.device.findMany({ orderBy: { createdAt: 'desc' } });
+    return this.prisma.device.findMany({
+      orderBy: [
+        { lastSeenAt: { sort: 'desc', nulls: 'last' } },
+        { createdAt: 'asc' },
+      ],
+    });
   }
 
   async findById(id: string) {

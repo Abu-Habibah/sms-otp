@@ -40,7 +40,7 @@ return {
     workspaceName: workspace?.name ?? null,
   },
   apiKey: device.apiKey,
-  serverUrl: process.env['PUBLIC_API_BASE_URL'] ?? 'http://localhost:3000',
+  serverUrl: process.env['PUBLIC_API_BASE_URL'] ?? 'http://localhost:6001',
 };
 ```
 

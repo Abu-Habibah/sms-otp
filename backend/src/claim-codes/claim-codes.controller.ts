@@ -1,10 +1,23 @@
-import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Post, UsePipes } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+import { z } from 'zod';
+import { ZodValidationPipe } from '../common/validation/zod-validation.pipe';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { getTenantContext, runWithWorkspaceContext } from '../common/tenant-context/tenant-context.storage';
 import { DevicesService } from '../devices/devices.service';
 import { ClaimCodesService } from './claim-codes.service';
+
+const claimBodySchema = z.object({
+  code: z.string().regex(/^[A-Z0-9]{6,12}$/, 'Claim code must be 6-12 uppercase alphanumeric characters'),
+  publicKey: z.string().min(1),
+  deviceInfo: z.object({
+    manufacturer: z.string().max(50).optional(),
+    model: z.string().max(50).optional(),
+    osVersion: z.string().max(50).optional(),
+    appVersion: z.string().max(50).optional(),
+  }).optional(),
+});
 
 @Controller('v1/claim-codes')
 export class ClaimCodesController {
@@ -43,6 +56,7 @@ export class ClaimCodesController {
     await this.claimCodes.cancel(id, ctx.tenantId);
   }
 
+  @UsePipes(new ZodValidationPipe(claimBodySchema))
   @Public()
   @Post('/claim')
   @HttpCode(200)

@@ -60,8 +60,7 @@ class TenantSelectionActivity : AppCompatActivity() {
         statusText = findViewById(R.id.statusText)
 
         changeTenantButton.setOnClickListener {
-            // For now, show a message that multi-tenant switching is coming soon
-            Toast.makeText(this, "Multi-tenant switching coming in v2.1", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, ManualCodeEntryActivity::class.java))
         }
 
         findViewById<Button>(R.id.backButton).setOnClickListener {

@@ -1,12 +1,20 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UsePipes } from '@nestjs/common';
 import { MatchMode } from '@prisma/client';
+import { z } from 'zod';
+import { createKeywordSchema } from '@sms-monitor/shared-types';
+import { ZodValidationPipe } from '../common/validation/zod-validation.pipe';
 import { getTenantContext } from '../common/tenant-context/tenant-context.storage';
 import { KeywordsService } from './keywords.service';
+
+const createKeywordBodySchema = createKeywordSchema.extend({
+  workspaceId: z.string().uuid().optional(),
+});
 
 @Controller('v1/keywords')
 export class KeywordsController {
   constructor(private readonly keywords: KeywordsService) {}
 
+  @UsePipes(new ZodValidationPipe(createKeywordBodySchema))
   @Post()
   @HttpCode(201)
   async create(@Body() body: { word: string; matchMode?: MatchMode; enabled?: boolean; workspaceId?: string }) {

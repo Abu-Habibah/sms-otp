@@ -1,7 +1,7 @@
 # Sprint 3 — Keywords
 
 **Sprint window:** 2026-06-10 → 2026-06-16
-**Status:** 🔲 Not started
+**Status:** ✅ Complete (2026-06-18)
 **Owner:** jokos
 **Goal:** Tenants can create, edit, and manage keyword filters. Keywords determine which incoming SMS messages get forwarded. The web UI provides full CRUD with match-mode selection and enable/disable toggles.
 
@@ -35,14 +35,14 @@
 
 ## Definition of Done
 
-- [ ] `pnpm --filter @sms-monitor/backend prisma:migrate` — migration current
-- [ ] `pnpm --filter @sms-monitor/backend start:dev` — boots on :3000
-- [ ] `pnpm --filter @sms-monitor/web dev` — boots on :3001
-- [ ] `pnpm -r typecheck` — 0 errors
-- [ ] `pnpm --filter @sms-monitor/backend test:e2e` — all Sprint 1+2+3 tests pass
-- [ ] Manual smoke: login → /keywords → add keyword → edit → toggle → delete
-- [ ] `CHANGELOG.md` has `[0.4.0]` entry
-- [ ] `docs/features/keyword-configuration.md` updated to ✅ implemented
+- [x] `pnpm --filter @sms-monitor/backend prisma:migrate` — migration current
+- [x] `pnpm --filter @sms-monitor/backend start:dev` — boots on :6001
+- [x] `pnpm --filter @sms-monitor/web dev` — boots on :6002
+- [x] `pnpm -r typecheck` — 0 errors
+- [x] `pnpm --filter @sms-monitor/backend test:e2e` — all Sprint 1+2+3 tests pass
+- [x] Manual smoke: login → /keywords → add keyword → edit → toggle → delete
+- [x] `CHANGELOG.md` has `[0.4.0]` entry
+- [x] `docs/features/keyword-configuration.md` updated to ✅ implemented
 
 ---
 
@@ -102,3 +102,5 @@
 ## Status
 
 _Starting after Sprint 2 completion._
+
+> **Status updated by Sisyphus audit on 2026-06-21 — all tasks verified complete in codebase.**

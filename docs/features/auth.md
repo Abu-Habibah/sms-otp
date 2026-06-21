@@ -198,8 +198,8 @@ Scenario: Refresh works
 
 ## Status
 
-- 🔲 Sprint 1 implementation (in progress)
-- 🔲 Sprint 2: forgot-password + email verification
+- ✅ Sprint 1 implementation (complete)
+- ✅ Sprint 2: forgot-password + email verification (implemented)
 
 ## Related
 

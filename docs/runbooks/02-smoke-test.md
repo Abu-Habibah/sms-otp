@@ -17,7 +17,7 @@ Verify the full path: a real SMS arrives on a real device → is captured → is
 
 ```bash
 # 1. Open the app, go to Settings, set the backend URL to your dev machine
-#    e.g. http://192.168.100.10:3000
+#    e.g. http://192.168.100.10:6001
 #    (this is the default; confirm in the Settings screen)
 
 # 2. Open the Keywords screen, add a keyword if you don't have one
