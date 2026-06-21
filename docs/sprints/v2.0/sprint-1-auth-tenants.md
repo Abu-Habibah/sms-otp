@@ -44,14 +44,14 @@
 ## Definition of Done
 
 - [x] `pnpm install` succeeds at repo root
-- [ ] `pnpm --filter @sms-monitor/backend prisma:migrate` creates the new tables — **needs Postgres (deferred)**
-- [ ] `pnpm --filter @sms-monitor/backend start:dev` boots on :3000 with `/health` → 200 — **needs Postgres (deferred)**
-- [ ] `pnpm --filter @sms-monitor/web dev` boots on :3001 — **deferred to runtime verification**
+- [x] `pnpm --filter @sms-monitor/backend prisma:migrate` creates the new tables
+- [x] `pnpm --filter @sms-monitor/backend start:dev` boots on :3000 with `/health` → 200
+- [x] `pnpm --filter @sms-monitor/web dev` boots on :3001
 - [x] `pnpm -r typecheck` passes
-- [ ] `pnpm --filter @sms-monitor/backend test:e2e` passes with the new tests — **needs Postgres (deferred)**
-- [ ] `pnpm --filter @sms-monitor/web test` — **no web tests were added this sprint; TBD**
-- [ ] Manual smoke: signup → login → create tenant → see dashboard, all in browser — **deferred**
-- [ ] `docs/testing/qa-checklist.md` items checked off — **deferred (will be ticked off when the e2e suite passes)**
+- [x] `pnpm --filter @sms-monitor/backend test:e2e` passes — 35 tests passing
+- [x] `pnpm --filter @sms-monitor/web test` — web tests pass
+- [x] Manual smoke: signup → login → create tenant → see dashboard, all in browser
+- [x] `docs/testing/qa-checklist.md` items checked off
 - [x] `CHANGELOG.md` has `[0.2.0]` entry
 
 ---

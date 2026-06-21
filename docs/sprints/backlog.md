@@ -155,19 +155,19 @@
 | ID | Task | Priority | Effort | Notes |
 |----|------|----------|--------|-------|
 | F-FUT-T1 | Certificate Pinning | P2 | 0.5 day | Prevents MITM attacks on HTTP forwarding |
-| F-FUT-T6 | EncryptedSharedPreferences | P1 | 0.5 day | Encrypt API keys and sensitive data at rest |
-| F-FUT-T7 | Foreground Service for Critical Forwarding | P1 | 1 day | Persistent notification ensures forwarding survives OEM battery optimization |
+| F-FUT-T6 | EncryptedSharedPreferences | P1 | 0.5 day | Encrypt API keys and sensitive data at rest ✅ Done |
+| F-FUT-T7 | Foreground Service for Critical Forwarding | P1 | 1 day | Persistent notification ensures forwarding survives OEM battery optimization ✅ Done |
 | F-FUT-T8 | Battery Optimization Exemption Prompt | P1 | 0.5 day | Guide users to whitelist app from Doze/standby buckets |
 
 ### Android v2.0 Multi-Tenant
 
 | ID | Task | Priority | Effort | Notes |
 |----|------|----------|--------|-------|
-| F-FUT-T9 | QR Code Scanner for Device Claim | P0 | 1 day | Scan claim codes from web admin (Sprint 4 dependency) |
-| F-FUT-T10 | Manual Code Entry (Fallback) | P0 | 0.5 day | 8-char alphanumeric input for broken cameras |
-| F-FUT-T11 | HMAC Device Token Authentication | P0 | 1 day | `Authorization: Bearer <apiKey>` + `X-Device-Signature` + `X-Device-Timestamp` |
-| F-FUT-T12 | Tenant Selection UI | P1 | 1 day | Switch between tenants if device is multi-tenant |
-| F-FUT-T13 | Backend Keyword Sync | P1 | 1 day | Pull keywords from backend instead of local-only |
+| F-FUT-T9 | QR Code Scanner for Device Claim | P0 | 1 day | ✅ Done (Sprint 5) |
+| F-FUT-T10 | Manual Code Entry (Fallback) | P0 | 0.5 day | ✅ Done (Sprint 5) |
+| F-FUT-T11 | HMAC Device Token Authentication | P0 | 1 day | ✅ Done (Sprint 5) |
+| F-FUT-T12 | Tenant Selection UI | P1 | 1 day | Multi-tenant switching (v3+) |
+| F-FUT-T13 | Backend Keyword Sync | P1 | 1 day | ✅ Done (Sprint 6) |
 
 ### Architecture & Quality
 
