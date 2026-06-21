@@ -25,7 +25,6 @@ const SCOPED_MODELS = new Set([
   'SmsLog',
   'ClaimCode',
   'RefreshToken',
-  'PasswordReset',
   'Workspace',
   'UserWorkspace',
 ]);

@@ -191,6 +191,12 @@ export function DevicesClient({ initialDevices, jwt, tenantPublicApiUrl, workspa
     }
   }, [workspaceId]);
 
+  useEffect(() => {
+    if (!workspaceId) {
+      refreshDevices();
+    }
+  }, [selectedWorkspaceId]);
+
   const refreshDevices = useCallback(async () => {
     const effectiveWorkspaceId = workspaceId || selectedWorkspaceId;
     const devicesUrl = effectiveWorkspaceId ? `/api/v1/workspaces/${effectiveWorkspaceId}/devices` : '/api/v1/devices';

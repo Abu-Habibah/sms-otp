@@ -8,12 +8,13 @@ import { Button } from '@/components/ui/Button';
 interface SettingsTabProps {
   workspace: Workspace;
   jwt: string;
+  tenantPublicApiUrl: string | null;
   onPublicApiUrlChange?: (url: string | null) => void;
 }
 
 type ValidationStatus = 'idle' | 'checking' | 'valid' | 'invalid' | 'error';
 
-export function SettingsTab({ workspace, jwt, onPublicApiUrlChange }: SettingsTabProps) {
+export function SettingsTab({ workspace, jwt, tenantPublicApiUrl, onPublicApiUrlChange }: SettingsTabProps) {
   const [name, setName] = useState(workspace.name);
   const [forwardUrl, setForwardUrl] = useState(workspace.forwardUrl ?? '');
   const [retentionDays, setRetentionDays] = useState(workspace.retentionDays);

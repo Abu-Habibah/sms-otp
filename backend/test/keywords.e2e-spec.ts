@@ -84,8 +84,8 @@ describe('Sprint 3 — Keywords (e2e)', () => {
         .set('Cookie', jar)
         .expect(200);
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(2);
+      expect(Array.isArray(res.body.keywords)).toBe(true);
+      expect(res.body.keywords.length).toBe(2);
     });
   });
 
@@ -226,7 +226,7 @@ describe('Sprint 3 — Keywords (e2e)', () => {
       }
 
       const res = await http.get('/v1/keywords').set('Cookie', jar).expect(200);
-      expect(res.body.length).toBe(5);
+      expect(res.body.keywords.length).toBe(5);
     });
   });
 });

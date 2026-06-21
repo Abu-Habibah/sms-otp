@@ -195,7 +195,7 @@ model ClaimCode {
   code           String    @unique
   expiresAt      DateTime
   usedAt         DateTime?
-  usedByDeviceId String?   @unique
+  usedByDeviceId String?
   createdBy      String
   createdAt      DateTime  @default(now())
 

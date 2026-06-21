@@ -63,7 +63,7 @@ export class DevicesService {
 
         await this.raw.claimCode.update({
           where: { id: claimCode.id },
-          data: { usedAt: new Date(), usedByDeviceId: updatedDevice.id },
+          data: { usedAt: new Date() },
         });
 
         const workspace = await this.raw.workspace.findUnique({
