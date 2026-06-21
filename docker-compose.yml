@@ -63,7 +63,7 @@ services:
     environment:
       DATABASE_URL: postgresql://sms_monitor:sms_monitor_dev@pg:5432/sms_monitor
       REDIS_URL: redis://rd:6379
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
       REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET:-${JWT_SECRET}}
       MAIL_HOST: mh
       NODE_ENV: development
