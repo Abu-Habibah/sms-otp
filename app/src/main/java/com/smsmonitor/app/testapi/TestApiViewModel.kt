@@ -118,12 +118,12 @@ class TestApiViewModel @Inject constructor(
     private fun sendToBackend(url: String, apiKey: String, sender: String, message: String): TestResult {
         val timestamp = formatTimestamp(System.currentTimeMillis())
         val payload = JSONObject().apply {
-            put("timestamp", timestamp)
             put("sender", sender)
             put("message", message)
             put("matchedKeyword", "test")
             put("deviceId", "android-test")
-            put("deviceAlias", "SMS Monitor Test")
+            put("smsId", "test-" + System.currentTimeMillis())
+            put("receivedAt", timestamp)
         }
 
         val requestBody = payload.toString().toRequestBody("application/json".toMediaType())
