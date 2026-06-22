@@ -242,19 +242,20 @@ export class WorkspaceService {
     const ctx = getTenantContext();
     await this.assertWorkspaceAccess(workspaceId, ctx.userId, ctx.role, []);
 
-    // Use runWithWorkspaceContext to auto-scope queries
-    return runWithWorkspaceContext(workspaceId, () =>
-      this.prisma.device.findMany({ orderBy: { createdAt: 'desc' } }),
-    );
+    return this.prisma.device.findMany({
+      where: { workspaceId },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findWorkspaceKeywords(workspaceId: string) {
     const ctx = getTenantContext();
     await this.assertWorkspaceAccess(workspaceId, ctx.userId, ctx.role, []);
 
-    return runWithWorkspaceContext(workspaceId, () =>
-      this.prisma.keyword.findMany({ orderBy: { createdAt: 'desc' } }),
-    );
+    return this.prisma.keyword.findMany({
+      where: { workspaceId },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findWorkspaceSmsLogs(workspaceId: string) {
