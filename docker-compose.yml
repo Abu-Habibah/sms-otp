@@ -59,7 +59,7 @@ services:
     container_name: sms-monitor-be
     restart: unless-stopped
     ports:
-      - "127.0.0.1:6001:3000"
+      - "6001:3000"
     environment:
       DATABASE_URL: postgresql://sms_monitor:sms_monitor_dev@pg:5432/sms_monitor
       REDIS_URL: redis://rd:6379
@@ -67,6 +67,8 @@ services:
       REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET:-${JWT_SECRET}}
       MAIL_HOST: mh
       NODE_ENV: development
+      PORT: 3000
+    command: sh -c "cd /app && node node_modules/.pnpm/prisma@5.22.0/node_modules/prisma/build/index.js migrate deploy --schema=backend/prisma/schema.prisma 2>/dev/null && node backend/dist/backend/src/main.js"
     depends_on:
       pg:
         condition: service_healthy
@@ -83,10 +85,11 @@ services:
     container_name: sms-monitor-web
     restart: unless-stopped
     ports:
-      - "127.0.0.1:6002:3001"
+      - "6002:3001"
     environment:
       - NEXT_PUBLIC_API_BASE_URL=http://be:3000
       - BACKEND_URL=http://be:3000
+      - HOSTNAME=0.0.0.0
     depends_on:
       - be
     networks:

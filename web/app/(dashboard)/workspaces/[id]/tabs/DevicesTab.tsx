@@ -30,7 +30,7 @@ function statusDot(status: DeviceStatus): string {
   }
 }
 
-function GenerateCodeModal({ open, onClose, workspaceId, tenantPublicApiUrl }: { open: boolean; onClose: () => void; workspaceId: string; tenantPublicApiUrl: string | null }) {
+function GenerateCodeModal({ open, onClose, workspaceId, tenantPublicApiUrl, workspacePublicApiUrl }: { open: boolean; onClose: () => void; workspaceId: string; tenantPublicApiUrl: string | null; workspacePublicApiUrl: string | null }) {
   const [ttl, setTtl] = useState(15);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
@@ -54,7 +54,7 @@ function GenerateCodeModal({ open, onClose, workspaceId, tenantPublicApiUrl }: {
   }, [expiresAt]);
 
   const qrPayload = generatedCode
-    ? `${tenantPublicApiUrl || (typeof window !== 'undefined' ? window.location.origin : '')}/v1/claim?code=${generatedCode}&workspaceId=${workspaceId}`
+    ? `${workspacePublicApiUrl || tenantPublicApiUrl || (typeof window !== 'undefined' ? window.location.origin : '')}/v1/claim?code=${generatedCode}&workspaceId=${workspaceId}`
     : null;
 
   const handleGenerate = async () => {
@@ -416,7 +416,7 @@ export function DevicesTab({ workspace, jwt, tenantPublicApiUrl }: DevicesTabPro
         </div>
       )}
 
-      <GenerateCodeModal open={showGenerateModal} workspaceId={workspace.id} tenantPublicApiUrl={tenantPublicApiUrl} onClose={() => setShowGenerateModal(false)} />
+        <GenerateCodeModal open={showGenerateModal} workspaceId={workspace.id} tenantPublicApiUrl={tenantPublicApiUrl} workspacePublicApiUrl={workspace.publicApiUrl ?? null} onClose={() => setShowGenerateModal(false)} />
     </>
   );
 }

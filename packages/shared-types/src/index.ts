@@ -262,6 +262,14 @@ export const listDevicesResponseSchema = z.object({
 });
 export type ListDevicesResponse = z.infer<typeof listDevicesResponseSchema>;
 
+export const listSmsLogsResponseSchema = z.object({
+  logs: z.array(smsLogSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  limit: z.number().int().positive(),
+});
+export type ListSmsLogsResponse = z.infer<typeof listSmsLogsResponseSchema>;
+
 export const claimDeviceResponseSchema = z.object({
   device: deviceSchema,
   apiKey: z.string(),
