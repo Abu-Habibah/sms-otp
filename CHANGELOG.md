@@ -4,6 +4,53 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added — All Skills Synced from Source Project (holistic-audit-refactor + re-syncs)
+
+**Full skill sync from opencodeGate project.** Added one new skill, re-synced two existing skills to latest source versions, and installed prompt management infrastructure. Build only bump per Decision Matrix (config/setup → Build only).
+
+#### New: holistic-audit-refactor v1.0 (Build: 001)
+- **`.opencode/skills/holistic-audit-refactor/`** — Full-stack code audit, bug detection, security hardening, performance optimization, and safe refactoring. 748 lines, 2 rules. SHA256: `5F5315D57F6CCA2BF7D6E3A9685F8C90FE9104AEE7F08B0C3E854960ECFDEEAF`.
+- Registered in `opencode.json` with trigger phrases: 'audit project', 'refactor code', 'fix bugs', 'security review', 'code cleanup', 'improve performance'.
+
+#### Re-synced: project-rules (SHA256 update)
+- Source had newer version. SHA256: `D91DCAD67486...` → `61522F4274B20118806066F9C5A716B402614612B5EA90CD62038706316C70AD`.
+
+#### Re-synced: prompt-rules (SHA256 update)
+- Source had newer version. SHA256: `CD4C8C99C6CA...` → `ED841850A1A6CF74597BC2E139C6E13A410F6A719518A734F4389C10806E9AE2`.
+
+#### Prompt management infrastructure
+- **`docs/prompts/INDEX.md`** — Prompts index (copied from source)
+- **`docs/prompts/templates/shared-prompt-template.md`** — Reusable prompt template (copied from source)
+- **`docs/prompts/generated/`** — Directory for generated prompts (per prompt-rules Rule 1)
+- **`docs/prompts/reports/`** — Directory for execution reports (per prompt-rules Rule 2)
+
+#### Config
+- **`.opencode/opencode.json`** — Added `skills.holistic-audit-refactor` block.
+
+### Refactored — Android App MVVM Migration & Service Improvements (v2.0 Build: 116)
+
+**Multiple Android activities and services refactored to modern patterns.** Activities now use MVVM + View Binding + StateFlow, services use proper lifecycle management and coroutine patterns.
+
+#### Activities (MVVM + View Binding + StateFlow)
+
+- **`ManualCodeEntryActivity.kt`** + `ManualCodeEntryViewModel.kt` — MVVM with View Binding, `StateFlow`, `repeatOnLifecycle`, `InputFilter.AllCaps()`
+- **`TenantSelectionActivity.kt`** + `TenantSelectionViewModel.kt` — MVVM with View Binding, `StateFlow`, string resources
+- **`KeywordsActivity.kt`** — `repeatOnLifecycle`, `Snackbar` with Undo, `isVisible`, empty keyword validation
+- **`KeywordsViewModel.kt`** — `combine()` + `stateIn(WhileSubscribed(5000))` for consolidated `uiState`
+- **`KeywordsAdapter.kt`** — View Binding, `inner class` ViewHolder, `adapterPosition` guards, `setOnClickListener` for Switch, match mode string resources
+- **`SettingsActivity.kt`** + `SettingsViewModel.kt` — MVVM with `update { it.copy() }`, `Dispatchers.IO` for crypto I/O, `Patterns.WEB_URL` validation, `isLoading` state, keyboard management
+
+#### Services
+
+- **`ClaimCodeScannerActivity.kt`** — `PlanarYUVLuminanceSource` with `rowStride`, background `analysisExecutor`, `STRATEGY_KEEP_ONLY_LATEST`, `NotFoundException` catch, `isProcessing` guard, proper imports
+- **`DeviceIdentificationService.kt`** — `executeAsync()` OkHttp extension, `while (isActive)`, `VibratorManager` (API 31+), dual notification channels, `isClaimed` guard, `JSONObject` parsing
+- **`ForwardingService.kt`** — Fixed `ACTION_START` intent, Android 14 `foregroundServiceType`, `START_STICKY`, `stopSelf()` after delay, `R.mipmap.ic_launcher`, `CATEGORY_SERVICE`
+- **`HeartbeatService.kt`** — `heartbeatJob?.isActive` guard, `ContextCompat.startForegroundService`, `applicationContext`, Kotlin `Duration`, `R.mipmap.ic_launcher`
+
+#### Resources
+
+- **`strings.xml`** — Added tenant labels, match mode strings, device info labels, error messages
+
 ### Changed — prompt-rules Skill v1.1 (Build: 002)
 
 **prompt-rules upgraded to v1.1 (Build: 002).** Adds system filtering to Phase 1 (prompt discovery) — the executor now only shows prompts matching the session's assigned system. Build only bump per Decision Matrix (fix → Build only).

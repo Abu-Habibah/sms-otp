@@ -12,6 +12,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Service for syncing keywords from backend.
@@ -74,8 +76,9 @@ class KeywordSyncService @Inject constructor(
 
         val request = requestBuilder.build()
 
-        return try {
-            val response = okHttpClient.newCall(request).execute()
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = okHttpClient.newCall(request).execute()
             response.use {
                 if (it.isSuccessful) {
                     val body = it.body?.string()
@@ -94,6 +97,7 @@ class KeywordSyncService @Inject constructor(
         } catch (e: Exception) {
             Log.e(TAG, "Sync error: ${e.message}", e)
             SyncResult.Error("Network error: ${e.message}")
+        }
         }
     }
 

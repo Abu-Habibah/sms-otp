@@ -133,14 +133,14 @@ class ClaimCodeScannerActivity : AppCompatActivity() {
 
                 imageAnalysis.setAnalyzer(analysisExecutor) { imageProxy ->
                     try {
-                        // Extract the Y plane (luminance) which is sufficient for QR scanning
-                        val buffer = imageProxy.planes[0].buffer
+                        val plane = imageProxy.planes[0]
+                        val buffer = plane.buffer
                         val data = ByteArray(buffer.remaining())
                         buffer.get(data)
 
                         val source = PlanarYUVLuminanceSource(
                             data,
-                            imageProxy.width,
+                            plane.rowStride,
                             imageProxy.height,
                             0, 0,
                             imageProxy.width,
@@ -203,7 +203,7 @@ class ClaimCodeScannerActivity : AppCompatActivity() {
 
         Toast.makeText(this, "Claim: $claimCode", Toast.LENGTH_SHORT).show()
 
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             val result = claimService.claimDevice(claimCode, workspaceId, deviceInfoCollector.collectDeviceInfoWithSim())
             withContext(Dispatchers.Main) {
                 when (result) {

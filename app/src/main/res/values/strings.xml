@@ -1,4 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SMS Monitor</string>
+    <string name="tenant_id_label">Tenant ID: %1$s</string>
+    <string name="device_id_label">Device ID: %1$s</string>
+    <string name="no_tenant_assigned">No tenant assigned</string>
+    <string name="device_not_claimed">Device not claimed</string>
+    <string name="please_claim_device">Please claim this device first</string>
+    <string name="switch_tenant">Switch Tenant</string>
+    <string name="back">Back</string>
+    <string name="tenant_information">Tenant Information</string>
+    <string name="match_mode_label">Match: %1$s</string>
+    <string name="match_mode_exact">Exact</string>
+    <string name="match_mode_contains">Contains</string>
+    <string name="match_mode_at_start">At Start</string>
+    <string name="match_mode_at_end">At End</string>
+    <string name="match_mode_regex">Regex</string>
+    <string name="error_empty_backend_url">Backend URL cannot be empty</string>
+    <string name="error_invalid_backend_url">Invalid Backend URL format</string>
+    <string name="settings_saved">Settings saved!</string>
+    <string name="settings_saved_success">Settings saved successfully</string>
+    <string name="not_available">N/A</string>
+    <string name="connected">Connected</string>
+
 </resources>

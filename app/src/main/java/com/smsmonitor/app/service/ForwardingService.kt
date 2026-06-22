@@ -7,6 +7,8 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -18,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -35,13 +38,28 @@ class ForwardingService : Service() {
         const val ACTION_START = "com.smsmonitor.ACTION_START_FORWARDING"
         const val ACTION_STOP = "com.smsmonitor.ACTION_STOP_FORWARDING"
 
+        /**
+         * Starts the service in the foreground with ACTION_START.
+         */
         fun start(context: Context) {
-            val intent = Intent(context, ForwardingService::class.java)
-            context.startForegroundService(intent)
+            val intent = Intent(context, ForwardingService::class.java).apply {
+                action = ACTION_START
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
         }
 
+        /**
+         * Stops the service.
+         */
         fun stop(context: Context) {
-            context.stopService(Intent(context, ForwardingService::class.java))
+            val intent = Intent(context, ForwardingService::class.java).apply {
+                action = ACTION_STOP
+            }
+            context.startService(intent)
         }
     }
 
@@ -58,28 +76,41 @@ class ForwardingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
-            ACTION_START -> {
-                Log.d(TAG, "Starting foreground service")
-                startForeground(NOTIFICATION_ID, createNotification("Processing SMS messages..."))
-                processPendingForwards()
-            }
-            ACTION_STOP -> {
-                Log.d(TAG, "Stopping foreground service")
-                stopForeground(STOP_FOREGROUND_REMOVE)
-                stopSelf()
-            }
-            else -> {
-                Log.d(TAG, "Unknown action: ${intent?.action}")
-            }
+        // Handle stop action immediately
+        if (intent?.action == ACTION_STOP) {
+            Log.d(TAG, "Stopping foreground service via action")
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
+            return START_NOT_STICKY
         }
-        return START_NOT_STICKY
+
+        // For all other starts (including null action), ensure startForeground is called
+        // to comply with Android 8+ requirements.
+        showForegroundNotification("Processing SMS messages...")
+
+        Log.d(TAG, "Handling action: ${intent?.action}")
+        processPendingForwards()
+
+        return START_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
         serviceScope.cancel()
         Log.d(TAG, "ForwardingService destroyed")
+    }
+
+    private fun showForegroundNotification(text: String) {
+        val notification = createNotification(text)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(
+                NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
+        } else {
+            startForeground(NOTIFICATION_ID, notification)
+        }
     }
 
     private fun createNotificationChannel() {
@@ -104,12 +135,13 @@ class ForwardingService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("SMS Monitor")
+            .setContentTitle(getString(R.string.app_name))
             .setContentText(text)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.mipmap.ic_launcher) // Use app icon instead of system icon
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .build()
     }
 
@@ -120,12 +152,16 @@ class ForwardingService : Service() {
                 SmsForwardWorker.enqueue(this@ForwardingService)
                 updateNotification("Forwarding SMS messages...")
 
-                // Wait a bit then stop if no more work
-                kotlinx.coroutines.delay(5000)
-                updateNotification("Ready")
+                // Keep service alive briefly to ensure worker gets CPU time
+                // then stop self. WorkManager will continue in background.
+                delay(10000)
+                Log.d(TAG, "Processing complete, stopping service")
+                stopSelf()
             } catch (e: Exception) {
                 Log.e(TAG, "Error processing forwards: ${e.message}", e)
                 updateNotification("Error occurred")
+                delay(2000)
+                stopSelf()
             }
         }
     }

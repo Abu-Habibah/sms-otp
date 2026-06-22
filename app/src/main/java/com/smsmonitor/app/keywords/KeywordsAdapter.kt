@@ -1,16 +1,14 @@
 package com.smsmonitor.app.keywords
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.Switch
-import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.smsmonitor.R
+import com.smsmonitor.databinding.ItemKeywordBinding
 import com.smsmonitor.domain.model.Keyword
+import com.smsmonitor.domain.model.MatchMode
 
 class KeywordsAdapter(
     private val onToggle: (Keyword) -> Unit,
@@ -19,39 +17,60 @@ class KeywordsAdapter(
 ) : ListAdapter<Keyword, KeywordsAdapter.KeywordViewHolder>(KeywordDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): KeywordViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_keyword, parent, false)
-        return KeywordViewHolder(view, onToggle, onEdit, onDelete)
+        val binding = ItemKeywordBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
+        )
+        return KeywordViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: KeywordViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    class KeywordViewHolder(
-        itemView: View,
-        private val onToggle: (Keyword) -> Unit,
-        private val onEdit: (Keyword) -> Unit,
-        private val onDelete: (Keyword) -> Unit
-    ) : RecyclerView.ViewHolder(itemView) {
-        private val keywordText: TextView = itemView.findViewById(R.id.keywordText)
-        private val matchModeText: TextView = itemView.findViewById(R.id.matchModeText)
-        private val enabledSwitch: Switch = itemView.findViewById(R.id.enabledSwitch)
-        private val editButton: ImageButton = itemView.findViewById(R.id.editButton)
-        private val deleteButton: ImageButton = itemView.findViewById(R.id.deleteButton)
+    inner class KeywordViewHolder(
+        private val binding: ItemKeywordBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+
+        init {
+            binding.enabledSwitch.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onToggle(getItem(position))
+                }
+            }
+            binding.editButton.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onEdit(getItem(position))
+                }
+            }
+            binding.deleteButton.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onDelete(getItem(position))
+                }
+            }
+        }
 
         fun bind(keyword: Keyword) {
-            keywordText.text = keyword.word
-            matchModeText.text = "Match: ${keyword.matchMode.name}"
+            with(binding) {
+                keywordText.text = keyword.word
+                matchModeText.text = itemView.context.getString(
+                    R.string.match_mode_label,
+                    itemView.context.getString(getMatchModeResId(keyword.matchMode))
+                )
 
-            enabledSwitch.setOnCheckedChangeListener(null)
-            enabledSwitch.isChecked = keyword.enabled
-            enabledSwitch.setOnCheckedChangeListener { _, _ ->
-                onToggle(keyword)
+                // Update switch state without triggering a listener
+                enabledSwitch.isChecked = keyword.enabled
             }
+        }
 
-            editButton.setOnClickListener { onEdit(keyword) }
-            deleteButton.setOnClickListener { onDelete(keyword) }
+        private fun getMatchModeResId(mode: MatchMode): Int = when (mode) {
+            MatchMode.EXACT -> R.string.match_mode_exact
+            MatchMode.CONTAINS -> R.string.match_mode_contains
+            MatchMode.AT_START -> R.string.match_mode_at_start
+            MatchMode.AT_END -> R.string.match_mode_at_end
+            MatchMode.REGEX -> R.string.match_mode_regex
         }
     }
 
@@ -65,4 +84,3 @@ class KeywordsAdapter(
         }
     }
 }
-

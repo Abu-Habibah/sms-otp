@@ -1,15 +1,17 @@
 package com.smsmonitor.app.keywords
 
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.smsmonitor.R
 import com.smsmonitor.databinding.ActivityKeywordsBinding
 import com.smsmonitor.databinding.DialogAddKeywordBinding
@@ -23,7 +25,14 @@ class KeywordsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityKeywordsBinding
     private val viewModel: KeywordsViewModel by viewModels()
-    private lateinit var adapter: KeywordsAdapter
+    
+    private val adapter by lazy {
+        KeywordsAdapter(
+            onToggle = { keyword -> viewModel.toggleKeyword(keyword) },
+            onEdit = { keyword -> showEditKeywordDialog(keyword) },
+            onDelete = { keyword -> showDeleteConfirmation(keyword) }
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,14 +44,10 @@ class KeywordsActivity : AppCompatActivity() {
     }
 
     private fun setupViews() {
-        adapter = KeywordsAdapter(
-            onToggle = { keyword -> viewModel.toggleKeyword(keyword) },
-            onEdit = { keyword -> showEditKeywordDialog(keyword) },
-            onDelete = { keyword -> showDeleteConfirmation(keyword) }
-        )
-
-        binding.keywordsRecyclerView.layoutManager = LinearLayoutManager(this)
-        binding.keywordsRecyclerView.adapter = adapter
+        binding.keywordsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(this@KeywordsActivity)
+            adapter = this@KeywordsActivity.adapter
+        }
 
         val swipeHandler = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             override fun onMove(
@@ -55,6 +60,12 @@ class KeywordsActivity : AppCompatActivity() {
                 val position = viewHolder.adapterPosition
                 val keyword = adapter.currentList[position]
                 viewModel.deleteKeyword(keyword)
+                Snackbar.make(binding.root, "Keyword deleted", Snackbar.LENGTH_LONG)
+                    .setAction("Undo") {
+                        // If your ViewModel/Service supports restore, call it here
+                        viewModel.addKeyword(keyword.word, keyword.matchMode)
+                    }
+                    .show()
             }
         }
         ItemTouchHelper(swipeHandler).attachToRecyclerView(binding.keywordsRecyclerView)
@@ -66,17 +77,19 @@ class KeywordsActivity : AppCompatActivity() {
 
     private fun observeState() {
         lifecycleScope.launch {
-            viewModel.keywords.collect { keywords ->
-                adapter.submitList(keywords)
-                binding.keywordsRecyclerView.visibility = if (keywords.isEmpty()) View.GONE else View.VISIBLE
-                binding.emptyText.visibility = if (keywords.isEmpty()) View.VISIBLE else View.GONE
-            }
-        }
-        lifecycleScope.launch {
-            viewModel.error.collect { message ->
-                if (message != null) {
-                    Toast.makeText(this@KeywordsActivity, message, Toast.LENGTH_SHORT).show()
-                    viewModel.clearError()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    adapter.submitList(state.keywords)
+                    binding.keywordsRecyclerView.isVisible = state.keywords.isNotEmpty()
+                    binding.emptyText.isVisible = state.keywords.isEmpty()
+                    
+                    // Show/hide a loading indicator if you have one
+                    // binding.progressBar.isVisible = state.isLoading
+
+                    state.error?.let {
+                        Snackbar.make(binding.root, it, Snackbar.LENGTH_SHORT).show()
+                        viewModel.clearError()
+                    }
                 }
             }
         }
@@ -95,9 +108,10 @@ class KeywordsActivity : AppCompatActivity() {
         val dialogBinding = DialogAddKeywordBinding.inflate(layoutInflater)
 
         dialogBinding.titleText.text = if (isEdit) "Edit Keyword" else "Add Keyword"
-        if (isEdit && existing != null) {
-            dialogBinding.keywordInput.setText(existing.word)
-            val targetId = when (existing.matchMode) {
+        
+        existing?.let { keyword ->
+            dialogBinding.keywordInput.setText(keyword.word)
+            val targetId = when (keyword.matchMode) {
                 MatchMode.EXACT -> R.id.radioExact
                 MatchMode.CONTAINS -> R.id.radioContains
                 MatchMode.AT_START -> R.id.radioAtStart
@@ -108,12 +122,17 @@ class KeywordsActivity : AppCompatActivity() {
         }
 
         val positiveLabel = if (isEdit) "Save" else "Add"
-        val editing: Keyword? = if (isEdit) existing else null
 
-        val dialog = AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setView(dialogBinding.root)
             .setPositiveButton(positiveLabel) { _, _ ->
                 val word = dialogBinding.keywordInput.text.toString().trim()
+                
+                if (word.isBlank()) {
+                    Snackbar.make(binding.root, "Keyword cannot be empty", Snackbar.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
                 val matchMode = when (dialogBinding.matchModeGroup.checkedRadioButtonId) {
                     R.id.radioExact -> MatchMode.EXACT
                     R.id.radioAtStart -> MatchMode.AT_START
@@ -121,17 +140,15 @@ class KeywordsActivity : AppCompatActivity() {
                     R.id.radioRegex -> MatchMode.REGEX
                     else -> MatchMode.CONTAINS
                 }
-                val target = editing
-                if (target != null) {
-                    viewModel.updateKeyword(target, word, matchMode)
+                
+                if (existing != null) {
+                    viewModel.updateKeyword(existing, word, matchMode)
                 } else {
                     viewModel.addKeyword(word, matchMode)
                 }
             }
             .setNegativeButton("Cancel", null)
-            .create()
-
-        dialog.show()
+            .show()
     }
 
     private fun showDeleteConfirmation(keyword: Keyword) {

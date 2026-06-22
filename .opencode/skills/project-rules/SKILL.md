@@ -4,6 +4,7 @@ version: v1.1 (Build: 002)
 description: Auto-documentation, sprint planning, and bug tracking rules. Use when completing tasks, adding features, fixing bugs, or creating projects.
 install_prompt: INSTALL_PROMPT.md
 related_skills:
+  - holistic-audit-refactor
   - prompt-rules
   - ui-ux-pro-max
 ---

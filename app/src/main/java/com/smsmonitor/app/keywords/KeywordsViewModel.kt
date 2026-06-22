@@ -7,56 +7,79 @@ import com.smsmonitor.domain.model.MatchMode
 import com.smsmonitor.domain.service.KeywordService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+/**
+ * UI state for the Keywords screen.
+ */
+data class KeywordsUiState(
+    val keywords: List<Keyword> = emptyList(),
+    val error: String? = null,
+    val isLoading: Boolean = false
+)
 
 @HiltViewModel
 class KeywordsViewModel @Inject constructor(
     private val keywordService: KeywordService
 ) : ViewModel() {
 
-    private val _keywords = MutableStateFlow<List<Keyword>>(emptyList())
-    val keywords: StateFlow<List<Keyword>> = _keywords.asStateFlow()
-
     private val _error = MutableStateFlow<String?>(null)
+    private val _isLoading = MutableStateFlow(false)
+
+    /**
+     * The consolidated UI state for the screen.
+     */
+    val uiState: StateFlow<KeywordsUiState> = combine(
+        keywordService.keywords,
+        _error,
+        _isLoading
+    ) { keywords, error, isLoading ->
+        KeywordsUiState(keywords, error, isLoading)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = KeywordsUiState()
+    )
+
+    // Exposed for backward compatibility with existing Activity code
+    val keywords: StateFlow<List<Keyword>> = keywordService.keywords
     val error: StateFlow<String?> = _error.asStateFlow()
-
-    init {
-        loadKeywords()
-    }
-
-    private fun loadKeywords() {
-        viewModelScope.launch {
-            keywordService.keywords.collect { keywordList ->
-                _keywords.value = keywordList
-            }
-        }
-    }
 
     fun addKeyword(word: String, matchMode: MatchMode) {
         viewModelScope.launch {
+            _isLoading.update { true }
             val result = keywordService.addKeyword(word, matchMode)
+            _isLoading.update { false }
+            
             result.onFailure { e ->
-                _error.value = e.message
+                _error.update { e.message }
             }
             result.onSuccess {
-                _error.value = null
+                _error.update { null }
             }
         }
     }
 
     fun updateKeyword(keyword: Keyword, newWord: String, newMatchMode: MatchMode) {
         viewModelScope.launch {
+            _isLoading.update { true }
             val result = keywordService.updateKeyword(
                 keyword.copy(word = newWord, matchMode = newMatchMode)
             )
+            _isLoading.update { false }
+
             result.onFailure { e ->
-                _error.value = e.message
+                _error.update { e.message }
             }
             result.onSuccess {
-                _error.value = null
+                _error.update { null }
             }
         }
     }

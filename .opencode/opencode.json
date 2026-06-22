@@ -15,6 +15,11 @@
       "enabled": true,
       "name": "prompt-rules",
       "description": "Prompt generation and execution management. Use when generating prompts for tasks, executing pending prompts, running tasks in batch, or creating agent-consumable prompt documents. Triggers: 'generate prompt for', 'create a prompt', 'execute task', 'go with your task', 'execute all tasks', 'run prompt'."
+    },
+    "holistic-audit-refactor": {
+      "enabled": true,
+      "name": "holistic-audit-refactor",
+      "description": "Full-stack code audit, bug detection, security hardening, performance optimization, and safe refactoring. Use when auditing codebase, fixing bugs, reviewing security, optimizing performance, or refactoring architecture. Triggers: 'audit project', 'refactor code', 'fix bugs', 'security review', 'code cleanup', 'improve performance'."
     }
   }
 }

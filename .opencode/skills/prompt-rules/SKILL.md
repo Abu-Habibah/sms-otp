@@ -5,6 +5,7 @@ description: Prompt generation and execution management. Use when generating pro
 install_prompt: INSTALL_PROMPT.md
 related_skills:
   - project-rules
+  - holistic-audit-refactor
 ---
 
 # Prompt Rules - Structured Prompt Generation & Execution

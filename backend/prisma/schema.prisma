@@ -62,13 +62,14 @@ model Tenant {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  users          User[]
-  devices        Device[]
-  keywords       Keyword[]
-  smsLogs        SmsLog[]
-  claimCodes     ClaimCode[]
-  refreshTokens  RefreshToken[]
-  workspaces     Workspace[]
+  users                 User[]
+  devices               Device[]
+  keywords              Keyword[]
+  smsLogs               SmsLog[]
+  claimCodes            ClaimCode[]
+  refreshTokens         RefreshToken[]
+  passwordResetTokens   PasswordResetToken[]
+  workspaces            Workspace[]
 
   @@index([slug])
   @@map("tenants")
@@ -87,6 +88,7 @@ model User {
 
   tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   refreshTokens  RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
   userWorkspaces UserWorkspace[]
 
   @@unique([tenantId, email])
@@ -148,6 +150,23 @@ model RefreshToken {
   @@index([userId])
   @@index([expiresAt])
   @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  tenantId  String
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
 }
 
 // ─── Devices ────────────────────────────────────────────────────────

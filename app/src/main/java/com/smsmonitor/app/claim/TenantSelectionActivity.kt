@@ -4,20 +4,16 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.repeatOnLifecycle
 import com.smsmonitor.R
-import com.smsmonitor.data.repository.ClaimService
-import com.smsmonitor.data.repository.SettingsRepository
+import com.smsmonitor.databinding.ActivityTenantSelectionBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * Tenant selection activity for multi-tenant devices.
@@ -32,55 +28,62 @@ class TenantSelectionActivity : AppCompatActivity() {
         }
     }
 
-    @Inject
-    lateinit var settingsRepository: SettingsRepository
-
-    @Inject
-    lateinit var claimService: ClaimService
-
-    private lateinit var currentTenantText: TextView
-    private lateinit var deviceInfoText: TextView
-    private lateinit var changeTenantButton: Button
-    private lateinit var progressBar: ProgressBar
-    private lateinit var statusText: TextView
+    private lateinit var binding: ActivityTenantSelectionBinding
+    private val viewModel: TenantSelectionViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_tenant_selection)
+        binding = ActivityTenantSelectionBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setupViews()
-        loadTenantInfo()
+        observeState()
     }
 
     private fun setupViews() {
-        currentTenantText = findViewById(R.id.currentTenantText)
-        deviceInfoText = findViewById(R.id.deviceInfoText)
-        changeTenantButton = findViewById(R.id.changeTenantButton)
-        progressBar = findViewById(R.id.progressBar)
-        statusText = findViewById(R.id.statusText)
-
-        changeTenantButton.setOnClickListener {
+        binding.changeTenantButton.setOnClickListener {
             startActivity(Intent(this, ManualCodeEntryActivity::class.java))
         }
 
-        findViewById<Button>(R.id.backButton).setOnClickListener {
+        binding.backButton.setOnClickListener {
             finish()
         }
     }
 
-    private fun loadTenantInfo() {
-        val deviceInfo = claimService.getDeviceInfo()
+    private fun observeState() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    updateUi(state)
+                }
+            }
+        }
+    }
 
+    private fun updateUi(state: TenantSelectionUiState) {
+        binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
+        
+        val deviceInfo = state.deviceInfo
         if (deviceInfo != null) {
-            currentTenantText.text = "Tenant ID: ${deviceInfo.tenantId}"
-            deviceInfoText.text = "Device ID: ${deviceInfo.id}"
-            changeTenantButton.visibility = View.VISIBLE
+            binding.currentTenantText.text = getString(R.string.tenant_id_label, deviceInfo.tenantId)
+            binding.deviceInfoText.text = getString(R.string.device_id_label, deviceInfo.id)
+            binding.changeTenantButton.visibility = View.VISIBLE
+            binding.statusText.visibility = View.GONE
         } else {
-            currentTenantText.text = "No tenant assigned"
-            deviceInfoText.text = "Device not claimed"
-            changeTenantButton.visibility = View.GONE
-            statusText.text = "Please claim this device first"
-            statusText.setTextColor(getColor(android.R.color.holo_red_dark))
+            binding.currentTenantText.text = getString(R.string.no_tenant_assigned)
+            binding.deviceInfoText.text = getString(R.string.device_not_claimed)
+            binding.changeTenantButton.visibility = View.GONE
+            binding.statusText.apply {
+                visibility = View.VISIBLE
+                text = getString(R.string.please_claim_device)
+                setTextColor(ContextCompat.getColor(this@TenantSelectionActivity, android.R.color.holo_red_dark))
+            }
+        }
+
+        state.error?.let { error ->
+            binding.statusText.visibility = View.VISIBLE
+            binding.statusText.text = error
+            binding.statusText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark))
         }
     }
 }

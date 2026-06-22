@@ -10,8 +10,8 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.google.gson.Gson
-import com.smsmonitor.R
 import com.smsmonitor.app.MainActivity
 import com.smsmonitor.data.repository.SettingsRepository
 import com.smsmonitor.data.repository.SyncResult
@@ -20,6 +20,7 @@ import com.smsmonitor.util.HmacSigner
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -29,6 +30,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.minutes
 
 @AndroidEntryPoint
 class HeartbeatService : Service() {
@@ -37,16 +39,16 @@ class HeartbeatService : Service() {
         private const val TAG = "HeartbeatService"
         private const val CHANNEL_ID = "heartbeat_channel"
         private const val NOTIFICATION_ID = 1002
-        private const val HEARTBEAT_INTERVAL_MS = 60_000L
-        private const val SYNC_THROTTLE_MS = 5 * 60 * 1000L
+        private val HEARTBEAT_INTERVAL = 1.minutes
+        private val SYNC_THROTTLE = 5.minutes
 
         fun start(context: Context) {
-            val intent = Intent(context, HeartbeatService::class.java)
-            context.startForegroundService(intent)
+            val intent = Intent(context.applicationContext, HeartbeatService::class.java)
+            ContextCompat.startForegroundService(context.applicationContext, intent)
         }
 
         fun stop(context: Context) {
-            context.stopService(Intent(context, HeartbeatService::class.java))
+            context.stopService(Intent(context.applicationContext, HeartbeatService::class.java))
         }
     }
 
@@ -63,6 +65,7 @@ class HeartbeatService : Service() {
     lateinit var deviceInfoCollector: com.smsmonitor.util.DeviceInfoCollector
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var heartbeatJob: Job? = null
     private val gson = Gson()
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -85,10 +88,11 @@ class HeartbeatService : Service() {
     }
 
     private fun startHeartbeatLoop() {
-        serviceScope.launch {
+        if (heartbeatJob?.isActive == true) return
+        heartbeatJob = serviceScope.launch {
             while (true) {
                 sendHeartbeat()
-                delay(HEARTBEAT_INTERVAL_MS)
+                delay(HEARTBEAT_INTERVAL)
             }
         }
     }
@@ -137,7 +141,7 @@ class HeartbeatService : Service() {
         val lastSync = settingsRepository.lastKeywordSyncTime
         val now = System.currentTimeMillis()
 
-        if (now - lastSync < SYNC_THROTTLE_MS) {
+        if (now - lastSync < SYNC_THROTTLE.inWholeMilliseconds) {
             Log.d(TAG, "Keyword sync throttled (last sync ${(now - lastSync) / 1000}s ago)")
             return
         }
@@ -173,7 +177,7 @@ class HeartbeatService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("SMS Monitor")
             .setContentText(text)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(com.smsmonitor.R.mipmap.ic_launcher)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .build()

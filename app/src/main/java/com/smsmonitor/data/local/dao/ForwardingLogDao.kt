@@ -37,4 +37,7 @@ interface ForwardingLogDao {
 
     @Query("SELECT COUNT(*) FROM forwarding_logs")
     suspend fun getLogCount(): Int
+
+    @Query("SELECT COUNT(*) FROM forwarding_logs WHERE status = :status")
+    suspend fun getLogCountByStatus(status: String): Int
 }
