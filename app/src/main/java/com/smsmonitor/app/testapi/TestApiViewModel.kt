@@ -85,7 +85,7 @@ class TestApiViewModel @Inject constructor(
 
     private fun fetchFromBackend(url: String, apiKey: String): TestResult {
         val builder = Request.Builder()
-            .url("$url/api/sms")
+            .url("$url/v1/sms-logs")
             .get()
 
         if (apiKey.isNotBlank()) {
@@ -129,7 +129,7 @@ class TestApiViewModel @Inject constructor(
         val requestBody = payload.toString().toRequestBody("application/json".toMediaType())
 
         val builder = Request.Builder()
-            .url("$url/sms/forward")
+            .url("$url/v1/sms")
             .post(requestBody)
             .addHeader("Content-Type", "application/json")
 
