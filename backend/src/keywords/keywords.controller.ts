@@ -1,11 +1,12 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Req, UseGuards, UsePipes } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Req, UnauthorizedException, UsePipes } from '@nestjs/common';
 import type { Request } from 'express';
 import { MatchMode } from '@prisma/client';
 import { z } from 'zod';
 import { createKeywordSchema } from '@sms-monitor/shared-types';
 import { ZodValidationPipe } from '../common/validation/zod-validation.pipe';
 import { Public } from '../common/decorators/public.decorator';
-import { ApiKeyAuthGuard } from '../common/guards/api-key-auth.guard';
+import { JwtService } from '@nestjs/jwt';
+import { RawPrismaService } from '../common/prisma/raw-prisma.service';
 import { runWithTenantContext } from '../common/tenant-context/tenant-context.storage';
 import { KeywordsService } from './keywords.service';
 
@@ -15,7 +16,11 @@ const createKeywordBodySchema = createKeywordSchema.extend({
 
 @Controller('v1/keywords')
 export class KeywordsController {
-  constructor(private readonly keywords: KeywordsService) {}
+  constructor(
+    private readonly keywords: KeywordsService,
+    private readonly jwt: JwtService,
+    private readonly raw: RawPrismaService,
+  ) {}
 
   @UsePipes(new ZodValidationPipe(createKeywordBodySchema))
   @Post()
@@ -25,22 +30,35 @@ export class KeywordsController {
   }
 
   @Public()
-  @UseGuards(ApiKeyAuthGuard)
   @Get()
-  async list(@Req() req: Request, @Query('workspaceId') workspaceId?: string) {
-    const reqWorkspaceId = (req as Request & { workspaceId?: string }).workspaceId;
-    const reqTenantId = (req as Request & { tenantId?: string }).tenantId;
-    const effectiveWsId = workspaceId || reqWorkspaceId;
+  async list(@Req() req: Request) {
+    const r = req as any;
+    const auth = r.headers?.authorization ?? '';
+    const bearer = auth.startsWith('Bearer ') ? auth.substring(7) : undefined;
 
-    if (reqTenantId) {
-      return runWithTenantContext(
-        { tenantId: reqTenantId, userId: (req as any).deviceId ?? '', role: 'VIEWER', workspaceId: effectiveWsId },
-        () => this.keywords.list(effectiveWsId).then(k => ({ keywords: k })),
-      );
+    // Try JWT (from cookie or Authorization header)
+    const cookieToken = r.cookies?.jwt;
+    const jwtToken = bearer || cookieToken;
+    if (jwtToken) {
+      try {
+        const payload = this.jwt.verify(jwtToken);
+        const ctx = { tenantId: payload.tenantId, userId: payload.sub, role: payload.role as any };
+        return runWithTenantContext(ctx, () => this.keywords.list().then(k => ({ keywords: k })));
+      } catch {}
     }
 
-    const keywords = await this.keywords.list(effectiveWsId);
-    return { keywords };
+    // Try device API key
+    if (bearer) {
+      const device = await this.raw.device.findUnique({ where: { apiKey: bearer } });
+      if (device && device.status !== 'REVOKED') {
+        return runWithTenantContext(
+          { tenantId: device.tenantId, userId: device.id, role: 'VIEWER', workspaceId: device.workspaceId },
+          () => this.keywords.list(device.workspaceId).then(k => ({ keywords: k })),
+        );
+      }
+    }
+
+    throw new UnauthorizedException();
   }
 
   @Get(':id')
