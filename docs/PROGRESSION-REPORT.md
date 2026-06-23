@@ -1,8 +1,12 @@
 # SMS Monitor — Progression Report
 
-**Report Date:** 2026-06-20
+**Report Date:** 2026-06-22
 **Project:** SMS Monitor v2.0
 **Status:** ✅ Complete
+
+**Versions:**
+- **Web Admin:** v2.4 (Build: 001)
+- **Android App:** v2.0
 
 ---
 

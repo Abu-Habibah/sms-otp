@@ -2,7 +2,11 @@
 
 Multi-tenant SMS monitoring platform. Tenants register, claim Android devices, and configure forwarding to their own systems (CRM, School Management, HRIS, etc.).
 
-**v1.0** (Android + test Express backend) shipped and sealed in `src-backup/v1.0/`. **v2.0** (NestJS + Postgres + Redis + Next.js web admin) is in **Sprint 1 — Auth & Tenants (build-verified; runtime verification deferred to next session)**. Sprint 2 (Devices & Claim Codes) is scoped and ready to start as soon as the dev-infra problem (Postgres on this host) is resolved.
+**Versions:**
+- **Web Admin:** [v2.4 (Build: 001)](web/version.json)
+- **Android App:** v2.0
+
+**v1.0** (Android + test Express backend) shipped and sealed in `src-backup/v1.0/`. **v2.0** (NestJS + Postgres + Redis + Next.js web admin) is fully implemented across all 9 sprints.
 
 ---
 
@@ -128,6 +132,13 @@ Per project-rules Rule 9 (v1.1, Build: 001), every documentation file uses a sys
 - [docs/sprints/v2.0/sprint-7-sms-ingest.md](docs/sprints/v2.0/sprint-7-sms-ingest.md) — Sprint 7 (SMS Ingest v2.0) — ✅ complete
 - [docs/sprints/v2.0/sprint-8-api-completion-cleanup.md](docs/sprints/v2.0/sprint-8-api-completion-cleanup.md) — Sprint 8 (API Completion & Cleanup) — ✅ complete
 - [docs/sprints/v2.0/sprint-9-workspaces.md](docs/sprints/v2.0/sprint-9-workspaces.md) — Sprint 9 (Workspaces) — ✅ complete
+
+### 📝 Tasks
+- [docs/tasks/README.md](docs/tasks/README.md) — Task index (audit remediation phases)
+- [docs/tasks/be-task-phase1-security-hardening.md](docs/tasks/be-task-phase1-security-hardening.md) — Phase 1: Security (Zod validation, token hashing, CORS)
+- [docs/tasks/be-task-phase2-missing-features.md](docs/tasks/be-task-phase2-missing-features.md) — Phase 2: Password reset, email verification
+- [docs/tasks/be-task-phase3-infra-testing.md](docs/tasks/be-task-phase3-infra-testing.md) — Phase 3: E2E tests, pagination, sort order
+- [docs/tasks/be-task-phase4-docs-cleanup.md](docs/tasks/be-task-phase4-docs-cleanup.md) — Phase 4: Doc staleness cleanup
 
 ### 📖 Runbooks & Operations
 - [docs/runbooks/01-local-dev.md](docs/runbooks/01-local-dev.md) — Bring up the monorepo on a fresh dev machine
