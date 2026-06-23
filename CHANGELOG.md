@@ -4,6 +4,72 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed — Keywords Page Redirecting to Login
+
+**GET /v1/keywords now handles dual authentication (JWT + device API key).** The global JWT guard was blocking device API key auth, breaking Android keyword sync. Created `DualAuthGuard` that tries JWT first, then falls back to device API key.
+
+#### Backend
+- **`backend/src/keywords/keywords.controller.ts`** — `@Public()` + manual JWT/API key verification in handler
+- **`backend/src/common/guards/dual-auth.guard.ts`** — NEW: Dual auth guard for endpoints accessed by both web admin and Android devices
+
+### Fixed — Workspace Scoping for Keywords and Devices
+
+**Workspace detail pages now correctly filter keywords and devices by workspace.** The Prisma `$extends` middleware with `Object.assign(this, ext)` didn't properly register in Prisma v5, breaking `runWithWorkspaceContext`.
+
+#### Backend
+- **`backend/src/workspaces/workspace.service.ts`** — `findWorkspaceDevices`, `findWorkspaceKeywords`, `findWorkspaceSmsLogs` now pass `where: { workspaceId }` directly instead of relying on middleware
+
+### Fixed — Android Test API Endpoints
+
+**Android Test API was using hardcoded legacy v1.0 endpoints.** Updated to match v2.0 backend.
+
+#### Android
+- **`app/.../testapi/TestApiViewModel.kt`** — `GET /api/sms` → `GET /v1/sms-logs`, `POST /sms/forward` → `POST /v1/sms`, added required `smsId` field
+
+### Fixed — Claim with Empty Public Key
+
+**Android sends `publicKey: ""` (empty string) but Zod validation required min 1 character.** Made optional with default empty string.
+
+#### Backend
+- **`backend/src/claim-codes/claim-codes.controller.ts`** — `publicKey` now optional with `.default('')`
+- **`backend/src/devices/devices.service.ts`** — Skip duplicate check when publicKey is empty, store null instead of empty string
+
+### Fixed — Docker Port Mapping HOSTNAME
+
+**Next.js standalone server defaulted to `localhost`, blocking Docker port forwarding.** Added `HOSTNAME=0.0.0.0` environment variable.
+
+#### Infrastructure
+- **`docker-compose.yml`** — Added `HOSTNAME=0.0.0.0` to web service
+
+### Fixed — Health Check Test Button
+
+**Workspace Settings "Test" button sent raw URL but backend expected `workspaceId`.** Also backend blocked `192.168.x.x` private IPs which are valid for LAN device access.
+
+#### Backend
+- **`backend/src/health/health.controller.ts`** — Removed private IP range block (loopback only)
+#### Web Admin
+- **`web/app/(dashboard)/workspaces/[id]/tabs/SettingsTab.tsx`** — Now sends `workspaceId` instead of raw URL
+
+### Fixed — Invalid Credentials After Docker Rebuild
+
+**Database was wiped during Docker rebuild, causing all accounts to be lost.** User needs to sign up again.
+
+#### Infrastructure
+- Note: Docker volumes with persistent data should be used in production
+
+### Changed — Service Ports to 6001-6006 Range
+
+**All host-facing ports moved to 6001-6006 range to avoid conflicts with common services.**
+
+| Service | Old Port | New Port |
+|---------|----------|----------|
+| Backend API | 3000 | 6001 |
+| Web Admin | 3001 | 6002 |
+| PostgreSQL | 5432 | 6003 |
+| Redis | 6379 | 6004 |
+| MailHog SMTP | 1025 | 6005 |
+| MailHog Web UI | 8025 | 6006 |
+
 ### Added — All Skills Synced from Source Project (holistic-audit-refactor + re-syncs)
 
 **Full skill sync from opencodeGate project.** Added one new skill, re-synced two existing skills to latest source versions, and installed prompt management infrastructure. Build only bump per Decision Matrix (config/setup → Build only).
