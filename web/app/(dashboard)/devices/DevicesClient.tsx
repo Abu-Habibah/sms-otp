@@ -294,6 +294,22 @@ export function DevicesClient({ initialDevices, jwt, tenantPublicApiUrl, workspa
         </div>
       )}
 
+      {!workspaceId && workspaces.length > 0 && (
+        <div className="flex items-center gap-2 mb-4">
+          <select
+            value={selectedWorkspaceId}
+            onChange={(e) => setSelectedWorkspaceId(e.target.value)}
+            className="rounded-md border border-input bg-background px-3 py-1.5 text-sm"
+          >
+            <option value="">All devices</option>
+            {workspaces.map((ws) => (
+              <option key={ws.id} value={ws.id}>{ws.name}</option>
+            ))}
+          </select>
+          <span className="text-sm text-muted-foreground">{filteredDevices.length} devices</span>
+        </div>
+      )}
+
       {devices.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border/30 p-14 text-center">
           <Smartphone className="mx-auto h-10 w-10 text-muted-foreground/30" />
@@ -312,18 +328,6 @@ export function DevicesClient({ initialDevices, jwt, tenantPublicApiUrl, workspa
         <>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {!workspaceId && workspaces.length > 0 && (
-                <select
-                  value={selectedWorkspaceId}
-                  onChange={(e) => setSelectedWorkspaceId(e.target.value)}
-                  className="rounded-md border border-input bg-background px-3 py-1.5 text-sm"
-                >
-                  <option value="">All devices</option>
-                  {workspaces.map((ws) => (
-                    <option key={ws.id} value={ws.id}>{ws.name}</option>
-                  ))}
-                </select>
-              )}
               <span className="text-sm text-muted-foreground">{filteredDevices.length} devices</span>
               {revokedCount > 0 && (
                 <button
