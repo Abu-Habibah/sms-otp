@@ -62,8 +62,6 @@ export default async function DashboardHome() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-gray-900">{me.data.tenant.name}</h1>
         <div className="flex items-center gap-2 mt-1.5 text-sm text-gray-500">
-          <code className="rounded-md bg-gray-100 px-2 py-0.5 font-mono text-xs">{me.data.tenant.slug}</code>
-          <span className="text-gray-300">·</span>
           <span>{me.data.user.email}</span>
           <Badge variant="secondary" className="font-mono text-xs">
             {me.data.role}
