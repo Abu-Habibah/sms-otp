@@ -12,7 +12,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -53,7 +55,7 @@ class ManualCodeEntryViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val deviceInfo = deviceInfoCollector.collectDeviceInfoWithSim()
-                val result = claimService.claimDevice(code, null, deviceInfo)
+                val result = withContext(Dispatchers.IO) { claimService.claimDevice(code, null, deviceInfo) }
                 
                 when (result) {
                     is ClaimResult.Success -> {

@@ -84,7 +84,7 @@ class SmsHttpSender(
         val requestBody = json.toRequestBody("application/json".toMediaType())
 
         val request = Request.Builder()
-            .url("$baseUrl/sms/forward")
+            .url("$baseUrl/v1/sms")
             .post(requestBody)
             .addHeader("Content-Type", "application/json")
             .addHeader("Authorization", "Bearer $apiKey")

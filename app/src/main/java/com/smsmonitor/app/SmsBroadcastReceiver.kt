@@ -71,7 +71,7 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
         val body = combinedMessage.toString()
         val smsId = generateSmsId(senderAddress, timestamp)
 
-        Log.d(TAG, "[Broadcast] SMS captured: from=$senderAddress body='$body'")
+        Log.d(TAG, "[Broadcast] SMS captured: from=$senderAddress")
 
         val smsMessage = SmsMessage(
             id = smsId,

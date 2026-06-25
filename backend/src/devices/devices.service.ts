@@ -24,7 +24,7 @@ export class DevicesService {
       androidVersion?: string;
     },
   ) {
-    // Find and validate the claim code (raw query — public endpoint, no tenant context)
+    // Validate claim code (read-only, outside transaction)
     const claimCode = await this.raw.claimCode.findUnique({ where: { code } });
     if (!claimCode) {
       throw new NotFoundException('Claim code not found');
@@ -37,102 +37,106 @@ export class DevicesService {
     }
 
     // Check if device with this public key already exists in this workspace
-    const existingDevice = await this.raw.device.findFirst({
+    const existingDevice = publicKey ? await this.raw.device.findFirst({
       where: { publicKey: publicKey, workspaceId: claimCode.workspaceId }
-    });
+    }) : null;
 
+    // Wrap all writes in a transaction for atomicity
     if (existingDevice) {
       if (existingDevice.status === 'REVOKED') {
-        const now = new Date();
-        const updatedDevice = await this.raw.device.update({
-          where: { id: existingDevice.id },
-          data: {
-            status: 'ACTIVE',
-            lastSeenAt: now,
-            lastHeartbeat: now,
-            ...(deviceInfo?.manufacturer !== undefined && { manufacturer: deviceInfo.manufacturer }),
-            ...(deviceInfo?.model !== undefined && { model: deviceInfo.model }),
-            ...(deviceInfo?.osVersion !== undefined && { osVersion: deviceInfo.osVersion }),
-            ...(deviceInfo?.appVersion !== undefined && { appVersion: deviceInfo.appVersion }),
-            ...(deviceInfo?.simSlot1Number !== undefined && { simSlot1Number: deviceInfo.simSlot1Number }),
-            ...(deviceInfo?.simSlot2Number !== undefined && { simSlot2Number: deviceInfo.simSlot2Number }),
-            ...(deviceInfo?.deviceModel !== undefined && { deviceModel: deviceInfo.deviceModel }),
-            ...(deviceInfo?.androidVersion !== undefined && { androidVersion: deviceInfo.androidVersion }),
-          },
-        });
+        return this.raw.$transaction(async (tx) => {
+          const now = new Date();
+          const updatedDevice = await tx.device.update({
+            where: { id: existingDevice.id },
+            data: {
+              status: 'ACTIVE',
+              lastSeenAt: now,
+              lastHeartbeat: now,
+              ...(deviceInfo?.manufacturer !== undefined && { manufacturer: deviceInfo.manufacturer }),
+              ...(deviceInfo?.model !== undefined && { model: deviceInfo.model }),
+              ...(deviceInfo?.osVersion !== undefined && { osVersion: deviceInfo.osVersion }),
+              ...(deviceInfo?.appVersion !== undefined && { appVersion: deviceInfo.appVersion }),
+              ...(deviceInfo?.simSlot1Number !== undefined && { simSlot1Number: deviceInfo.simSlot1Number }),
+              ...(deviceInfo?.simSlot2Number !== undefined && { simSlot2Number: deviceInfo.simSlot2Number }),
+              ...(deviceInfo?.deviceModel !== undefined && { deviceModel: deviceInfo.deviceModel }),
+              ...(deviceInfo?.androidVersion !== undefined && { androidVersion: deviceInfo.androidVersion }),
+            },
+          });
 
-        await this.raw.claimCode.update({
-          where: { id: claimCode.id },
-          data: { usedAt: new Date() },
-        });
+          await tx.claimCode.update({
+            where: { id: claimCode.id },
+            data: { usedAt: new Date() },
+          });
 
-        const workspace = await this.raw.workspace.findUnique({
-          where: { id: updatedDevice.workspaceId },
-        });
+          const workspace = await tx.workspace.findUnique({
+            where: { id: updatedDevice.workspaceId },
+          });
 
-        return {
-          device: {
-            id: updatedDevice.id,
-            name: updatedDevice.name,
-            status: updatedDevice.status,
-            createdAt: updatedDevice.createdAt.toISOString(),
-            workspaceId: updatedDevice.workspaceId,
-            workspaceName: workspace?.name ?? null,
-          },
-          apiKey: updatedDevice.apiKey,
-          serverUrl: process.env['PUBLIC_API_BASE_URL'] ?? 'http://localhost:6001',
-        };
+          return {
+            device: {
+              id: updatedDevice.id,
+              name: updatedDevice.name,
+              status: updatedDevice.status,
+              createdAt: updatedDevice.createdAt.toISOString(),
+              workspaceId: updatedDevice.workspaceId,
+              workspaceName: workspace?.name ?? null,
+            },
+            apiKey: updatedDevice.apiKey,
+            serverUrl: process.env['PUBLIC_API_BASE_URL'] ?? 'http://localhost:6001',
+          };
+        });
       }
 
       // Device already claimed and active
       throw new ConflictException('Device already claimed');
     }
 
-    const now = new Date();
-    const device = await this.raw.device.create({
-      data: {
-        tenantId: claimCode.tenantId,
-        workspaceId: claimCode.workspaceId,
-        name: deviceInfo?.manufacturer ? `${deviceInfo.manufacturer} ${deviceInfo.model ?? ''}`.trim() : 'Claimed Device',
-        status: 'ACTIVE',
-        deviceSecret: crypto.randomUUID(),
-        publicKey,
-        lastSeenAt: now,
-        lastHeartbeat: now,
-        manufacturer: deviceInfo?.manufacturer ?? null,
-        model: deviceInfo?.model ?? null,
-        osVersion: deviceInfo?.osVersion ?? null,
-        appVersion: deviceInfo?.appVersion ?? null,
-        simSlot1Number: deviceInfo?.simSlot1Number ?? null,
-        simSlot2Number: deviceInfo?.simSlot2Number ?? null,
-        deviceModel: deviceInfo?.deviceModel ?? null,
-        androidVersion: deviceInfo?.androidVersion ?? null,
-      },
-    });
+    // New device claim — atomically create device + mark code used
+    return this.raw.$transaction(async (tx) => {
+      const now = new Date();
+      const device = await tx.device.create({
+        data: {
+          tenantId: claimCode.tenantId,
+          workspaceId: claimCode.workspaceId,
+          name: deviceInfo?.manufacturer ? `${deviceInfo.manufacturer} ${deviceInfo.model ?? ''}`.trim() : 'Claimed Device',
+          status: 'ACTIVE',
+          deviceSecret: crypto.randomUUID(),
+          publicKey: publicKey || null,
+          lastSeenAt: now,
+          lastHeartbeat: now,
+          manufacturer: deviceInfo?.manufacturer ?? null,
+          model: deviceInfo?.model ?? null,
+          osVersion: deviceInfo?.osVersion ?? null,
+          appVersion: deviceInfo?.appVersion ?? null,
+          simSlot1Number: deviceInfo?.simSlot1Number ?? null,
+          simSlot2Number: deviceInfo?.simSlot2Number ?? null,
+          deviceModel: deviceInfo?.deviceModel ?? null,
+          androidVersion: deviceInfo?.androidVersion ?? null,
+        },
+      });
 
-    // Fetch workspace name for response
-    const workspace = await this.raw.workspace.findUnique({
-      where: { id: device.workspaceId },
-    });
+      await tx.claimCode.update({
+        where: { id: claimCode.id },
+        data: { usedAt: new Date(), usedByDeviceId: device.id },
+      });
 
-    // Mark claim code as used
-    await this.raw.claimCode.update({
-      where: { id: claimCode.id },
-      data: { usedAt: new Date(), usedByDeviceId: device.id },
-    });
+      const workspace = await tx.workspace.findUnique({
+        where: { id: device.workspaceId },
+      });
 
-    return {
-      device: {
-        id: device.id,
-        name: device.name,
-        status: device.status,
-        createdAt: device.createdAt.toISOString(),
-        workspaceId: device.workspaceId,
-        workspaceName: workspace?.name ?? null,
-      },
-      apiKey: device.apiKey,
-      serverUrl: process.env['PUBLIC_API_BASE_URL'] ?? 'http://localhost:6001',
-    };
+      return {
+        device: {
+          id: device.id,
+          name: device.name,
+          status: device.status,
+          createdAt: device.createdAt.toISOString(),
+          workspaceId: device.workspaceId,
+          workspaceName: workspace?.name ?? null,
+        },
+        apiKey: device.apiKey,
+        serverUrl: process.env['PUBLIC_API_BASE_URL'] ?? 'http://localhost:6001',
+      };
+    });
   }
 
   async list() {

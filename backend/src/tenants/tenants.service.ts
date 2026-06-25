@@ -1,5 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { TenantScopedPrismaService } from '../common/prisma/tenant-scoped-prisma.service';
+import { getTenantContext } from '../common/tenant-context/tenant-context.storage';
 
 export interface CreateTenantInput {
   name: string;
@@ -43,9 +44,11 @@ export class TenantsService {
   }
 
   async list() {
-    // For superadmin cross-tenant listing — Sprint 1 leaves this as
-    // "the caller's own tenant" via the standard tenant context.
-    return this.prisma.tenant.findMany({ orderBy: { createdAt: 'asc' } });
+    const ctx = getTenantContext();
+    return this.prisma.tenant.findMany({
+      where: { id: ctx.tenantId },
+      orderBy: { createdAt: 'asc' },
+    });
   }
 
   async update(id: string, input: Partial<CreateTenantInput>) {
