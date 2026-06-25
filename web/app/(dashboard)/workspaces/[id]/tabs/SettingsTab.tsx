@@ -40,7 +40,7 @@ export function SettingsTab({ workspace, jwt, tenantPublicApiUrl, onPublicApiUrl
       const res = await fetch('/api/health/check-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, type }),
+        body: JSON.stringify({ workspaceId: workspace.id }),
       });
       if (!res.ok) {
         setStatus('invalid');

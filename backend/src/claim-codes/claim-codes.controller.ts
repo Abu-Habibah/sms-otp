@@ -10,7 +10,7 @@ import { ClaimCodesService } from './claim-codes.service';
 
 const claimBodySchema = z.object({
   code: z.string().regex(/^[A-Z0-9]{6,12}$/, 'Claim code must be 6-12 uppercase alphanumeric characters'),
-  publicKey: z.string().min(1),
+  publicKey: z.string().optional().default(''),
   deviceInfo: z.object({
     manufacturer: z.string().max(50).optional(),
     model: z.string().max(50).optional(),

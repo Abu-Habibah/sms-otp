@@ -58,14 +58,11 @@ export class HealthController {
       const parsed = new URL(targetUrl);
 
       // Block internal/loopback addresses (SSRF prevention)
+      // Only block loopback — private IPs are allowed for LAN devices
       const blockedHosts = new Set([
         'localhost', '127.0.0.1', '::1', '0.0.0.0',
       ]);
       if (blockedHosts.has(parsed.hostname)) {
-        return { reachable: false, error: 'Internal URLs not allowed' };
-      }
-      // Block private IPv4 ranges
-      if (/^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/.test(parsed.hostname)) {
         return { reachable: false, error: 'Internal URLs not allowed' };
       }
       // Only allow http/https

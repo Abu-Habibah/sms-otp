@@ -5,13 +5,13 @@
  *   npx ts-node backend/test/clients/claim-flow.ts
  *
  * Environment variables:
- *   API_BASE_URL  — backend URL (default: http://localhost:3000)
+ *   API_BASE_URL  — backend URL (default: http://localhost:6001)
  *   TENANT_SLUG   — tenant slug to signup/login with
  *   ADMIN_EMAIL   — admin email (default: admin@test.com)
  *   ADMIN_PASS    — admin password (default: Strong1Pass!)
  */
 
-const API_BASE = process.env.API_BASE_URL ?? 'http://localhost:3000';
+const API_BASE = process.env.API_BASE_URL ?? 'http://localhost:6001';
 const TENANT_SLUG = process.env.TENANT_SLUG ?? `test-${Date.now()}`;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? `admin-${TENANT_SLUG}@test.com`;
 const ADMIN_PASS = process.env.ADMIN_PASS ?? 'Strong1Pass!';
