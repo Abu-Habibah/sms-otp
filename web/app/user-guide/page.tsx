@@ -11,7 +11,7 @@ export default function UserGuidePage() {
 
         <div className="mb-8">
           <span className="inline-block bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium mb-4">
-            User Guide v2.0
+            User Guide v2.4
           </span>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">SMS Monitor User Guide</h1>
           <p className="text-gray-500">Complete guide to installing, configuring, and using the platform.</p>
@@ -66,12 +66,12 @@ git clone https://github.com/your-org/sms-monitor.git
 cd sms-monitor
 
 # 2. Start all services
-docker-compose up -d
+docker compose up -d
 
 # 3. Verify
-curl http://localhost:3000/health
+curl http://localhost:6001/health
 # Should return: {"status":"ok"}`}</code></pre>
-            <p className="text-sm text-gray-600 mt-3">This starts: PostgreSQL, Redis, MailHog, Backend API (port 3000), and Web Admin (port 3001).</p>
+            <p className="text-sm text-gray-600 mt-3">This starts: PostgreSQL, Redis, MailHog, Backend API (port 6001), and Web Admin (port 6002).</p>
           </div>
 
           <h3 className="text-lg font-semibold mb-3">Option 2: Local Development</h3>
@@ -109,10 +109,10 @@ pnpm dev:web`}</code></pre>
                 </tr>
               </thead>
               <tbody className="divide-y">
-                <tr><td className="px-4 py-3 font-mono text-xs">DATABASE_URL</td><td className="px-4 py-3">PostgreSQL connection string</td><td className="px-4 py-3 text-gray-500">postgresql://sms_monitor:sms_monitor_dev@localhost:5432/sms_monitor</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">REDIS_URL</td><td className="px-4 py-3">Redis connection string</td><td className="px-4 py-3 text-gray-500">redis://localhost:6379</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">JWT_SECRET</td><td className="px-4 py-3">Secret for signing JWT tokens</td><td className="px-4 py-3 text-gray-500">dev-secret-change-in-production</td></tr>
-                <tr><td className="px-4 py-3 font-mono text-xs">BACKEND_URL</td><td className="px-4 py-3">Backend API URL (for web proxy)</td><td className="px-4 py-3 text-gray-500">http://localhost:3000</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">DATABASE_URL</td><td className="px-4 py-3">PostgreSQL connection string</td><td className="px-4 py-3 text-gray-500">postgresql://sms_monitor:sms_monitor_dev@localhost:6003/sms_monitor</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">REDIS_URL</td><td className="px-4 py-3">Redis connection string</td><td className="px-4 py-3 text-gray-500">redis://localhost:6004</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">JWT_SECRET</td><td className="px-4 py-3">Secret for signing JWT tokens</td><td className="px-4 py-3 text-gray-500">(required, no default)</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">BACKEND_URL</td><td className="px-4 py-3">Backend API URL (for web proxy)</td><td className="px-4 py-3 text-gray-500">http://localhost:6001</td></tr>
               </tbody>
             </table>
           </div>
@@ -144,12 +144,13 @@ pnpm dev:web`}</code></pre>
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="text-lg font-semibold mb-3">2. Create Your Account</h3>
               <ol className="list-decimal list-inside text-gray-600 space-y-2">
-                <li>Go to <code className="bg-gray-100 px-1 rounded">http://localhost:3001/signup</code></li>
+                <li>Go to <code className="bg-gray-100 px-1 rounded">http://localhost:6002/signup</code></li>
                 <li>Enter your name, email, and password</li>
                 <li>The tenant slug is auto-generated from your email domain</li>
                 <li>You become the OWNER of the new tenant</li>
               </ol>
               <p className="text-gray-600 mt-3 text-sm"><strong>Adding team members:</strong> As an OWNER or ADMIN, you can invite users from the Users page in the sidebar. Enter their email, name, role, and a temporary password.</p>
+              <p className="text-gray-600 mt-2 text-sm"><strong>Password reset:</strong> Use the "Forgot Password" link on the login page. A reset link is sent to your email (in development, check MailHog at <code className="bg-gray-100 px-1 rounded">http://localhost:6006</code>).</p>
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -356,10 +357,13 @@ pnpm dev:web`}</code></pre>
               <tbody className="divide-y">
                 <tr><td className="px-4 py-3 font-mono text-xs">POST</td><td className="px-4 py-3 font-mono text-xs">/v1/auth/signup</td><td className="px-4 py-3">Create account</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">POST</td><td className="px-4 py-3 font-mono text-xs">/v1/auth/login</td><td className="px-4 py-3">Login</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">POST</td><td className="px-4 py-3 font-mono text-xs">/v1/auth/forgot-password</td><td className="px-4 py-3">Request password reset email</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">POST</td><td className="px-4 py-3 font-mono text-xs">/v1/auth/reset-password</td><td className="px-4 py-3">Reset password with token</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">GET</td><td className="px-4 py-3 font-mono text-xs">/v1/me</td><td className="px-4 py-3">Get current user</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">GET</td><td className="px-4 py-3 font-mono text-xs">/v1/workspaces</td><td className="px-4 py-3">List workspaces</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">GET</td><td className="px-4 py-3 font-mono text-xs">/v1/devices</td><td className="px-4 py-3">List devices</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">GET</td><td className="px-4 py-3 font-mono text-xs">/v1/keywords</td><td className="px-4 py-3">List keywords</td></tr>
+                <tr><td className="px-4 py-3 font-mono text-xs">GET</td><td className="px-4 py-3 font-mono text-xs">/v1/sms-logs</td><td className="px-4 py-3">List SMS logs (paginated)</td></tr>
                 <tr><td className="px-4 py-3 font-mono text-xs">POST</td><td className="px-4 py-3 font-mono text-xs">/v1/sms</td><td className="px-4 py-3">Ingest SMS (device)</td></tr>
               </tbody>
             </table>
@@ -417,16 +421,16 @@ pnpm dev:web`}</code></pre>
 
           <h3 className="text-lg font-semibold mt-6 mb-3">Quick Commands</h3>
           <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm"><code>{`# Start services
-docker-compose up -d
+docker compose up -d
 
 # Stop services
-docker-compose down
+docker compose down
 
 # View logs
-docker-compose logs -f
+docker compose logs -f
 
 # Reset everything
-docker-compose down -v`}</code></pre>
+docker compose down -v`}</code></pre>
         </section>
 
         {/* Footer */}
