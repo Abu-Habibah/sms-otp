@@ -108,13 +108,19 @@ Per project-rules Rule 9 (v1.1, Build: 001), every documentation file uses a sys
 ### ✨ Features
 - [docs/features/android-enhancements.md](docs/features/android-enhancements.md) — Android security, performance, and architecture improvements (Sprint 5 — ✅ implemented)
 - [docs/features/auth.md](docs/features/auth.md) — v2.0 feature spec for authentication (signup, login, refresh, logout, JWT, refresh-token rotation)
-- [docs/features/backend-forwarding.md](docs/features/backend-forwarding.md) — v1.0 feature spec for SMS forwarding
+- [docs/features/backend-forwarding.md](docs/features/backend-forwarding.md) — v1.0 feature spec for SMS forwarding (v2.0 uses BullMQ)
 - [docs/features/claim-codes.md](docs/features/claim-codes.md) — v2.0 feature spec for device claim codes (Sprint 2 — ✅ implemented)
 - [docs/features/devices.md](docs/features/devices.md) — v2.0 feature spec for device records + per-device API keys (Sprint 2 — ✅ implemented)
+- [docs/features/device-identification.md](docs/features/device-identification.md) — Device identification flow (trigger, check, acknowledge)
+- [docs/features/device-information.md](docs/features/device-information.md) — Device info collection (manufacturer, model, SIM, OS)
 - [docs/features/device-onboarding.md](docs/features/device-onboarding.md) — v2.0 Android device onboarding flow (QR + manual entry fallback)
 - [docs/features/keyword-configuration.md](docs/features/keyword-configuration.md) — v1.0 feature spec for keyword filtering (Sprint 3 — ✅ implemented)
+- [docs/features/keyword-sync-heartbeat.md](docs/features/keyword-sync-heartbeat.md) — Keyword sync throttling after heartbeat
 - [docs/features/sms-monitoring.md](docs/features/sms-monitoring.md) — v1.0 feature spec for SMS capture (Sprint 4 — ✅ implemented)
+- [docs/features/tenant-public-url.md](docs/features/tenant-public-url.md) — Public API URL configuration for QR codes
 - [docs/features/tenants.md](docs/features/tenants.md) — v2.0 feature spec for tenant management (multi-tenant isolation, slug, roles)
+- [docs/features/workspace-scoped-claim.md](docs/features/workspace-scoped-claim.md) — Workspace-scoped device claim flow
+- [docs/features/workspaces.md](docs/features/workspaces.md) — Workspace CRUD and member management
 
 ### 🐛 Bugs & Issues
 - [docs/bugs/known-issues.md](docs/bugs/known-issues.md) — Active known issues

@@ -1,8 +1,8 @@
 # Feature: Workspace-Scoped Device Claim
 
 **Feature ID:** F-WORKSPACE-CLAIM
-**Status:** ✅ Backend implemented, Android/Web pending (2026-06-18)
-**Last Updated:** 2026-06-13
+**Status:** ✅ Complete (all 3 layers: backend + Android + web)
+**Last Updated:** 2026-06-22
 
 ---
 
